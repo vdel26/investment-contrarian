@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Sentiment Dashboard - SRCL</title>
+    <style>
+        @font-face {
+            font-family: 'Berkeley Mono';
+            src: url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap');
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #e4e4e4;
+            font-family: 'IBM Plex Mono', 'Berkeley Mono', 'Courier New', monospace;
+            margin: 0;
+            padding: 24px;
+            font-size: 14px;
+            line-height: 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Page header container */
+        .page-header-container {
+            background-color: #050505;
+            border: 1px solid #333;
+            margin-bottom: 32px;
+        }
+
+        .page-header-container .box-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Consistent headers for all boxes */
+        .box-header {
+            background-color: #111;
+            border-bottom: 1px solid #333;
+            padding: 12px 24px;
+        }
+
+        .box-title {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: #ff8c00;
+        }
+
+        .timestamp {
+            color: #666;
+            font-size: 11px;
+        }
+
+        /* Signal Analysis Frame */
+        .signal-analysis-frame {
+            background-color: #050505;
+            border: 1px solid #333;
+            margin-bottom: 32px;
+            padding: 0;
+        }
+
+        .signal-content {
+            padding: 32px;
+            text-align: center;
+        }
+
+        .signal-recommendation {
+            font-size: 48px;
+            font-weight: 600;
+            color: #FFB347;
+            margin-bottom: 16px;
+            letter-spacing: 0.05em;
+        }
+
+        .signal-recommendation.buy {
+            color: #4ADE80;
+        }
+
+        .signal-recommendation.sell {
+            color: #F87171;
+        }
+
+        .signal-recommendation.hold {
+            color: #FFB347;
+        }
+
+        .signal-description {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #e4e4e4;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+
+        /* Responsive grid */
+        .indicators-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+        }
+
+        @media (min-width: 768px) {
+            .indicators-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Indicator container */
+        .indicator-container {
+            border: 1px solid #333;
+            padding: 0;
+            background-color: #050505;
+        }
+
+        .indicator-content {
+            padding: 24px;
+        }
+
+        /* Main display section */
+        .main-display {
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .index-value {
+            font-size: 56px;
+            font-weight: 600;
+            line-height: 1;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .index-label {
+            font-size: 18px;
+            margin-bottom: 20px;
+            letter-spacing: 0.1em;
+        }
+
+        /* Main bar visualization */
+        .main-bar-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .main-bar {
+            height: 24px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .main-bar-fill {
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .main-bar-marker {
+            position: absolute;
+            top: -4px;
+            width: 3px;
+            height: 32px;
+            background: #fff;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+            transform: translateX(-50%);
+        }
+
+        .zone-divider {
+            position: absolute;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            background: #000;
+            opacity: 0.5;
+        }
+
+        .zone-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .zone-label {
+            flex: 1;
+            font-size: 9px;
+            text-align: center;
+            line-height: 11px;
+            opacity: 0.8;
+        }
+
+        .main-stats {
+            font-size: 12px;
+            color: #e4e4e4;
+            text-align: center;
+            margin-bottom: 24px;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        /* ASCII-style bar chart */
+        .ascii-bar {
+            margin: 24px 0;
+            font-size: 11px;
+            line-height: 16px;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+
+        /* Tooltip styling */
+        .bar-label[title] {
+            cursor: help;
+            position: relative;
+        }
+
+        .bar-label[title]:hover {
+            color: #e4e4e4;
+        }
+
+        /* Native tooltip enhancement */
+        .bar-label {
+            width: 160px;
+            text-align: right;
+            padding-right: 16px;
+            color: #666;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+            font-size: 10px;
+        }
+
+        .bar-chart {
+            flex: 1;
+            font-family: monospace;
+        }
+
+        .bar-value {
+            margin-left: 8px;
+            color: #e4e4e4;
+            font-size: 11px;
+        }
+
+        /* Zone indicators */
+        .zone-indicator {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            margin-left: 4px;
+        }
+
+        /* Color indicators */
+        .fear-extreme { color: #7B68EE; }
+        .fear { color: #4169E1; }
+        .neutral { color: #999; }
+        .greed { color: #FFB347; }
+        .greed-extreme { color: #FF6B6B; }
+
+        .positive { color: #4ADE80; }
+        .negative { color: #F87171; }
+
+        /* Collapsible sections */
+        .collapsible-section {
+            margin-bottom: 16px;
+        }
+
+        .section-header {
+            background-color: #111;
+            border: 1px solid #333;
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.2s;
+            font-size: 11px;
+        }
+
+        .section-header:hover {
+            border-color: #444;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: #e4e4e4;
+        }
+
+        .section-summary {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .section-content {
+            background-color: #0a0a0a;
+            border: 1px solid #333;
+            border-top: none;
+            padding: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            font-size: 11px;
+            line-height: 18px;
+        }
+
+        /* Table styling */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+            font-size: 11px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 8px 0;
+            text-align: left;
+            border-bottom: 1px solid #222;
+        }
+
+        .data-table th {
+            color: #666;
+            font-weight: normal;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .data-table td {
+            color: #e4e4e4;
+        }
+
+        .data-table tr:hover td {
+            background-color: #111;
+        }
+
+        /* ASCII decorations */
+        .ascii-divider {
+            margin: 20px 0;
+            color: #333;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        /* Remove old AAII styles and simplify */
+        .bullish { color: #4ADE80; }
+        .bearish { color: #F87171; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Page Header -->
+        <div class="page-header-container">
+            <div class="box-header">
+                <span class="box-title">MARKET SENTIMENT DASHBOARD | CONTRARIAN INDICATORS</span>
+                <span class="timestamp">2025-06-08 19:59:53 ET</span>
+            </div>
+        </div>
+
+        <!-- Contrarian Signal Analysis -->
+        <div class="signal-analysis-frame">
+            <div class="box-header">
+                <span class="box-title">CONTRARIAN SIGNAL ANALYSIS</span>
+            </div>
+            <div class="signal-content">
+                <div class="signal-recommendation">HOLD</div>
+                <div class="signal-description">
+                    Fear & Greed at 63 (Greed) suggests mild complacency, while AAII spread near zero (+0.2%) indicates investor indecision. 
+                    Mixed signals warrant caution - await clearer extremes in either indicator before taking contrarian positions.
+                </div>
+            </div>
+        </div>
+
+        <div class="indicators-grid">
+            <!-- Fear & Greed Index -->
+            <div class="indicator-container">
+                <div class="box-header">
+                    <span class="box-title">CNN FEAR & GREED INDEX</span>
+                </div>
+                <div class="indicator-content">
+                    <div class="main-display">
+                        <div class="index-value greed">63</div>
+                        <div class="index-label greed">GREED</div>
+                        <div class="main-bar-container">
+                        <div class="main-bar">
+                            <div class="main-bar-fill" style="width: 63%; background: #FFB347;"></div>
+                            <div class="main-bar-marker" style="left: 63%;"></div>
+                            <div class="zone-divider" style="left: 20%;"></div>
+                            <div class="zone-divider" style="left: 40%;"></div>
+                            <div class="zone-divider" style="left: 60%;"></div>
+                            <div class="zone-divider" style="left: 80%;"></div>
+                        </div>
+                        <div class="zone-labels">
+                            <span class="zone-label fear-extreme">EXTREME<br>FEAR</span>
+                            <span class="zone-label fear">FEAR</span>
+                            <span class="zone-label neutral">NEUTRAL</span>
+                            <span class="zone-label greed">GREED</span>
+                            <span class="zone-label greed-extreme">EXTREME<br>GREED</span>
+                        </div>
+                        <div class="main-stats">From this level, markets typically see -8% to +3% returns over next 30 days</div>
+                    </div>
+                </div>
+
+                <div class="ascii-bar">
+                    <div class="bar-row">
+                        <span class="bar-label" title="Measures expected S&P 500 volatility over next 30 days. Higher VIX = more fear">VIX <span class="zone-indicator fear">◾FEAR</span></span>
+                        <span class="bar-chart fear">██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span>
+                        <span class="bar-value">16.2 <span class="negative">↓ 4.71%</span></span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label" title="Ratio of put options (bearish) to call options (bullish). Above 1.0 signals fear">PUT/CALL <span class="zone-indicator neutral">◾NEUT</span></span>
+                        <span class="bar-chart neutral">██████████████████░░░░░░░░░░░░░░░░░░░░░░</span>
+                        <span class="bar-value">0.82 <span class="negative">↓ 5.75%</span></span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label" title="S&P 500 vs its 125-day moving average. Above average = positive momentum">MOMENTUM <span class="zone-indicator greed">◾GREED</span></span>
+                        <span class="bar-chart greed">█████████████████████████████░░░░░░░░░░░</span>
+                        <span class="bar-value">72.5 <span class="positive">↑ 4.62%</span></span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label" title="Spread between junk bonds and Treasury yields. Narrow spread = risk appetite">JUNK DEMAND <span class="zone-indicator greed">◾GREED</span></span>
+                        <span class="bar-chart greed">███████████████████████████░░░░░░░░░░░░░</span>
+                        <span class="bar-value">68.3 <span class="positive">↑ 3.17%</span></span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label" title="Volume of rising stocks vs falling stocks on NYSE. High ratio = bullish">BREADTH <span class="zone-indicator neutral">◾NEUT</span></span>
+                        <span class="bar-chart neutral">█████████████████████░░░░░░░░░░░░░░░░░░░</span>
+                        <span class="bar-value">54.2 <span class="positive">↑ 2.85%</span></span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label" title="Treasury bond vs stock returns over 20 days. Bonds outperforming = fear">SAFE HAVEN <span class="zone-indicator fear">◾FEAR</span></span>
+                        <span class="bar-chart fear">████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span>
+                        <span class="bar-value">31.8 <span class="negative">↓ 11.68%</span></span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label" title="NYSE stocks at 52-week highs vs lows. More highs = bullish sentiment">PRICE STR <span class="zone-indicator greed">◾GREED</span></span>
+                        <span class="bar-chart greed">████████████████████████████░░░░░░░░░░░░</span>
+                        <span class="bar-value">71.9 <span class="positive">↑ 4.05%</span></span>
+                    </div>
+                </div>
+
+                <div class="ascii-divider">─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─</div>
+
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection('fg-timeframe')">
+                        <span class="section-title">▶ HISTORICAL TIMEFRAMES</span>
+                        <span class="section-summary">Current: 63 | 1W: 61 | 1M: 55</span>
+                    </div>
+                    <div id="fg-timeframe-content" class="section-content" style="display: none;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>TIMEFRAME</th>
+                                    <th>VALUE</th>
+                                    <th>SENTIMENT</th>
+                                    <th>CHANGE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Current</td>
+                                    <td class="greed">63</td>
+                                    <td class="greed">GREED</td>
+                                    <td class="positive">+5 (8.62%)</td>
+                                </tr>
+                                <tr>
+                                    <td>1 Day Ago</td>
+                                    <td class="neutral">58</td>
+                                    <td class="neutral">NEUTRAL</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>1 Week Ago</td>
+                                    <td class="greed">61</td>
+                                    <td class="greed">GREED</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>1 Month Ago</td>
+                                    <td class="neutral">55</td>
+                                    <td class="neutral">NEUTRAL</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>1 Year Ago</td>
+                                    <td class="neutral">45</td>
+                                    <td class="neutral">NEUTRAL</td>
+                                    <td>-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- AAII Sentiment Survey -->
+            <div class="indicator-container">
+                <div class="box-header">
+                    <span class="box-title">AAII SENTIMENT SURVEY</span>
+                </div>
+                <div class="indicator-content">
+                    <div class="main-display">
+                        <div class="index-value neutral">+0.2%</div>
+                        <div class="index-label neutral">BULL-BEAR SPREAD</div>
+                        <div class="main-bar-container">
+                        <div class="main-bar" style="overflow: hidden;">
+                            <div class="aaii-segment bearish" style="position: absolute; left: 0; width: 32.5%; height: 100%; background: #4169E1;"></div>
+                            <div class="aaii-segment neutral" style="position: absolute; left: 32.5%; width: 34.8%; height: 100%; background: #999;"></div>
+                            <div class="aaii-segment bullish" style="position: absolute; left: 67.3%; width: 32.7%; height: 100%; background: #FFB347;"></div>
+                        </div>
+                        <div class="zone-labels">
+                            <span class="zone-label fear">BEARISH<br>32.5%</span>
+                            <span class="zone-label neutral">NEUTRAL<br>34.8%</span>
+                            <span class="zone-label greed">BULLISH<br>32.7%</span>
+                        </div>
+                        <div class="main-stats">When spread near zero, markets often at inflection point</div>
+                    </div>
+                </div>
+
+                <div class="ascii-bar">
+                    <div class="bar-row">
+                        <span class="bar-label" title="Bull-Bear spread over time">SPREAD</span>
+                        <span class="bar-chart">██████████████████████░░░░░░░░░░░░░░░░░░</span>
+                        <span class="bar-value">+0.2% <span class="positive">↑ 1.9pp</span></span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label" title="% below historical average">BULL VS AVG</span>
+                        <span class="bar-chart fear">████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span>
+                        <span class="bar-value">-5.3pp</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-label" title="% above historical average">BEAR VS AVG</span>
+                        <span class="bar-chart greed">██████████████░░░░░░░░░░░░░░░░░░░░░░░░░░</span>
+                        <span class="bar-value">+2.0pp</span>
+                    </div>
+                </div>
+
+                <div class="ascii-divider">─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─</div>
+
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection('aaii-history')">
+                        <span class="section-title">▶ HISTORICAL SPREADS</span>
+                        <span class="section-summary">52W: -41.2% to +28.4% | Avg: +7.5%</span>
+                    </div>
+                    <div id="aaii-history-content" class="section-content" style="display: none;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>DATE</th>
+                                    <th>SPREAD</th>
+                                    <th>BULL</th>
+                                    <th>BEAR</th>
+                                    <th>SIGNAL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Current</td>
+                                    <td>+0.2%</td>
+                                    <td>32.7%</td>
+                                    <td>32.5%</td>
+                                    <td class="neutral">NEUTRAL</td>
+                                </tr>
+                                <tr>
+                                    <td>1W Ago</td>
+                                    <td>-1.7%</td>
+                                    <td>32.9%</td>
+                                    <td>34.6%</td>
+                                    <td class="neutral">NEUTRAL</td>
+                                </tr>
+                                <tr>
+                                    <td>1M Ago</td>
+                                    <td>-12.4%</td>
+                                    <td>28.1%</td>
+                                    <td>40.5%</td>
+                                    <td class="fear">BEARISH</td>
+                                </tr>
+                                <tr>
+                                    <td>3M Ago</td>
+                                    <td>+18.2%</td>
+                                    <td>48.3%</td>
+                                    <td>30.1%</td>
+                                    <td class="greed">BULLISH</td>
+                                </tr>
+                                <tr>
+                                    <td>1Y Ago</td>
+                                    <td>-8.1%</td>
+                                    <td>31.2%</td>
+                                    <td>39.3%</td>
+                                    <td class="neutral">NEUTRAL</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection('aaii-signal')">
+                        <span class="section-title">▶ CONTRARIAN SIGNALS</span>
+                        <span class="section-summary">Current: No extreme reading</span>
+                    </div>
+                    <div id="aaii-signal-content" class="section-content" style="display: none;">
+                        <div class="stats-grid">
+                            <div>Extreme Bullish: <span style="color: #e4e4e4;">&gt; +20%</span></div>
+                            <div>Extreme Bearish: <span style="color: #e4e4e4;">&lt; -20%</span></div>
+                            <div>Last Extreme: <span style="color: #e4e4e4;">-41.2% (Feb 27)</span></div>
+                            <div>Signal Accuracy: <span style="color: #e4e4e4;">73% (2SD)</span></div>
+                            <div>Avg Reversal Time: <span style="color: #e4e4e4;">3-5 weeks</span></div>
+                            <div>Current Status: <span style="color: #e4e4e4;">Neutral Zone</span></div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sections
+        function toggleSection(section) {
+            const content = document.getElementById(`${section}-content`);
+            const header = content.previousElementSibling;
+            const title = header.querySelector('.section-title');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                title.textContent = title.textContent.replace('▶', '▼');
+            } else {
+                content.style.display = 'none';
+                title.textContent = title.textContent.replace('▼', '▶');
+            }
+        }
+
+        // Update timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            const timestamp = now.toISOString().replace('T', ' ').substring(0, 19) + ' ET';
+            document.querySelector('.timestamp').textContent = timestamp;
+        }
+
+        setInterval(updateTimestamp, 1000);
+
+        // Update colors based on values
+        function updateColors() {
+            const value = 63;
+            const mainValue = document.querySelector('.index-value');
+            const mainLabel = document.querySelector('.index-label');
+            
+            if (value < 20) {
+                mainValue.className = 'index-value fear-extreme';
+                mainLabel.className = 'index-label fear-extreme';
+            } else if (value < 40) {
+                mainValue.className = 'index-value fear';
+                mainLabel.className = 'index-label fear';
+            } else if (value < 60) {
+                mainValue.className = 'index-value neutral';
+                mainLabel.className = 'index-label neutral';
+            } else if (value < 80) {
+                mainValue.className = 'index-value greed';
+                mainLabel.className = 'index-label greed';
+            } else {
+                mainValue.className = 'index-value greed-extreme';
+                mainLabel.className = 'index-label greed-extreme';
+            }
+        }
+
+        updateColors();
+
+        // Update bar color based on zone
+        function updateBarColor() {
+            const value = 63;
+            const barFill = document.querySelector('.main-bar-fill');
+            
+            if (value < 20) {
+                barFill.style.background = '#7B68EE'; // Extreme Fear - Purple
+            } else if (value < 40) {
+                barFill.style.background = '#4169E1'; // Fear - Blue
+            } else if (value < 60) {
+                barFill.style.background = '#999'; // Neutral - Gray
+            } else if (value < 80) {
+                barFill.style.background = '#FFB347'; // Greed - Orange
+            } else {
+                barFill.style.background = '#FF6B6B'; // Extreme Greed - Red
+            }
+        }
+
+        updateBarColor();
+
+        // Update AAII spread color
+        function updateSpreadColor() {
+            const spreadValue = 0.2;
+            const spreadElement = document.querySelector('.spread-value');
+            
+            if (Math.abs(spreadValue) < 5) {
+                spreadElement.className = 'spread-value neutral';
+            } else if (spreadValue > 0) {
+                spreadElement.className = 'spread-value bullish';
+            } else {
+                spreadElement.className = 'spread-value bearish';
+            }
+        }
+
+        // Update signal recommendation based on indicators
+        function updateSignalRecommendation() {
+            const fearGreedValue = 63;
+            const bullBearSpread = 0.2;
+            
+            let recommendation = "HOLD";
+            let description = "";
+            
+            // Contrarian logic
+            if (fearGreedValue > 80 && bullBearSpread > 20) {
+                recommendation = "SELL";
+                description = "Extreme greed (F&G: " + fearGreedValue + ") combined with excessive bullishness (AAII: +" + bullBearSpread + "%) signals peak optimism. Strong contrarian sell signal as markets often correct from euphoric levels.";
+            } else if (fearGreedValue < 20 && bullBearSpread < -20) {
+                recommendation = "BUY";
+                description = "Extreme fear (F&G: " + fearGreedValue + ") combined with excessive bearishness (AAII: " + bullBearSpread + "%) indicates capitulation. Strong contrarian buy signal as markets typically rebound from oversold conditions.";
+            } else if (fearGreedValue > 70 || bullBearSpread > 15) {
+                recommendation = "HOLD";
+                description = "Elevated greed levels suggest caution, but readings not extreme enough for contrarian action. Monitor for further deterioration in sentiment before considering defensive positions.";
+            } else if (fearGreedValue < 30 || bullBearSpread < -15) {
+                recommendation = "HOLD";
+                description = "Fear is present but not at panic levels. Watch for extreme readings or capitulation signals before taking contrarian long positions.";
+            } else {
+                recommendation = "HOLD";
+                description = "Fear & Greed at " + fearGreedValue + " (Greed) suggests mild complacency, while AAII spread near zero (+" + bullBearSpread + "%) indicates investor indecision. Mixed signals warrant caution - await clearer extremes in either indicator before taking contrarian positions.";
+            }
+            
+            const recElement = document.querySelector('.signal-recommendation');
+            recElement.textContent = recommendation;
+            recElement.className = 'signal-recommendation ' + recommendation.toLowerCase();
+            
+            document.querySelector('.signal-description').textContent = description;
+        }
+        
+        updateSignalRecommendation();
+    </script>
+</body>
+</html>

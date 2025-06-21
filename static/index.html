@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Sentiment Dashboard - SRCL</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Page Header -->
+        <div class="page-header-container">
+            <div class="box-header">
+                <span class="box-title">MARKET SENTIMENT DASHBOARD | CONTRARIAN INDICATORS</span>
+                <span id="timestamp" class="timestamp">--</span>
+            </div>
+        </div>
+
+        <!-- Contrarian Signal Analysis -->
+        <div class="signal-analysis-frame">
+            <div class="box-header">
+                <span class="box-title">CONTRARIAN SIGNAL ANALYSIS</span>
+                <span id="overall-meta" class="timestamp"></span>
+            </div>
+            <div class="signal-content">
+                <div id="signal-recommendation" class="signal-recommendation">HOLD</div>
+                <div id="signal-description" class="signal-description">
+                    Loading...
+                </div>
+            </div>
+        </div>
+
+        <div class="indicators-grid">
+            <!-- Fear & Greed Index -->
+            <div class="indicator-container">
+                <div class="box-header">
+                    <span class="box-title">CNN FEAR & GREED INDEX</span>
+                    <span id="fng-meta" class="timestamp"></span>
+                </div>
+                <div class="indicator-content">
+                    <div class="main-display">
+                        <div id="fng-value" class="index-value neutral">--</div>
+                        <div id="fng-rating" class="index-label neutral">LOADING</div>
+                        <div class="main-bar-container">
+                        <div class="main-bar">
+                            <div id="fng-bar-fill" class="main-bar-fill" style="width: 50%; background: #999;"></div>
+                            <div id="fng-bar-marker" class="main-bar-marker" style="left: 50%;"></div>
+                            <div class="zone-divider" style="left: 25%;"></div>
+                            <div class="zone-divider" style="left: 45%;"></div>
+                            <div class="zone-divider" style="left: 55%;"></div>
+                            <div class="zone-divider" style="left: 75%;"></div>
+                        </div>
+                        <div class="zone-labels">
+                            <span class="zone-label fear-extreme">EXTREME<br>FEAR</span>
+                            <span class="zone-label fear">FEAR</span>
+                            <span class="zone-label neutral">NEUTRAL</span>
+                            <span class="zone-label greed">GREED</span>
+                            <span class="zone-label greed-extreme">EXTREME<br>GREED</span>
+                        </div>
+                        <div id="fng-main-stats" class="main-stats">Loading historical context...</div>
+                    </div>
+                </div>
+
+                <div id="fng-components" class="ascii-bar">
+                    <!-- F&G Components Rendered Here -->
+                </div>
+
+                <div class="ascii-divider">─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─</div>
+
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection('fg-timeframe')">
+                        <span class="section-title">▶ HISTORICAL TIMEFRAMES</span>
+                        <span id="fng-summary" class="section-summary"></span>
+                    </div>
+                    <div id="fg-timeframe-content" class="section-content" style="display: none;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>TIMEFRAME</th>
+                                    <th>VALUE</th>
+                                    <th>SENTIMENT</th>
+                                    <th>CHANGE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fng-history-table">
+                                <!-- Historical F&G Data Rendered Here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- AAII Sentiment Survey -->
+            <div class="indicator-container">
+                <div class="box-header">
+                    <span class="box-title">AAII SENTIMENT SURVEY</span>
+                    <span id="aaii-meta" class="timestamp"></span>
+                </div>
+                <div class="indicator-content">
+                    <div class="main-display">
+                        <div id="aaii-spread-value" class="index-value neutral">--%</div>
+                        <div id="aaii-spread-label" class="index-label neutral">BULL-BEAR SPREAD</div>
+                        <div class="main-bar-container">
+                        <div class="main-bar" style="overflow: hidden;">
+                            <div id="aaii-bar-bearish" class="aaii-segment bearish" style="left: 0; background: #4169E1;"></div>
+                            <div id="aaii-bar-neutral" class="aaii-segment neutral"></div>
+                            <div id="aaii-bar-bullish" class="aaii-segment bullish"></div>
+                        </div>
+                        <div class="zone-labels">
+                            <span id="aaii-label-bearish" class="zone-label fear">BEARISH<br>--%</span>
+                            <span id="aaii-label-neutral" class="zone-label neutral">NEUTRAL<br>--%</span>
+                            <span id="aaii-label-bullish" class="zone-label greed">BULLISH<br>--%</span>
+                        </div>
+                        <div id="aaii-main-stats" class="main-stats">Loading analysis...</div>
+                    </div>
+                </div>
+
+                <div id="aaii-components" class="ascii-bar">
+                     <!-- AAII Components Rendered Here -->
+                </div>
+
+                <div class="ascii-divider">─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─</div>
+
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection('aaii-history')">
+                        <span class="section-title">▶ HISTORICAL SPREADS</span>
+                        <span id="aaii-summary" class="section-summary"></span>
+                    </div>
+                    <div id="aaii-history-content" class="section-content" style="display: none;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>DATE</th>
+                                    <th>SPREAD</th>
+                                    <th>BULL</th>
+                                    <th>BEAR</th>
+                                    <th>SIGNAL</th>
+                                </tr>
+                            </thead>
+                            <tbody id="aaii-history-table">
+                                <!-- Historical AAII Data Rendered Here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="loading-indicator" style="display: none;">
+        Loading Market Data...
+    </div>
+    <script src="js/app.js"></script>
+</body>
+</html> 
