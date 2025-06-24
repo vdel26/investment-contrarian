@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;600&display=swap');
+
 @font-face {
     font-family: 'Berkeley Mono';
     src: url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap');
@@ -10,9 +12,9 @@
 body {
     background-color: #0a0a0a;
     color: #e4e4e4;
-    font-family: 'IBM Plex Mono', 'Berkeley Mono', 'Courier New', monospace;
+    font-family: 'Geist Mono', 'SF Mono', monospace;
     margin: 0;
-    padding: 24px;
+    padding: 12px;
     font-size: 14px;
     line-height: 20px;
     -webkit-font-smoothing: antialiased;
@@ -40,7 +42,7 @@ body {
 .box-header {
     background-color: #111;
     border-bottom: 1px solid #333;
-    padding: 12px 24px;
+    padding: 12px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -67,16 +69,22 @@ body {
 }
 
 .signal-content {
-    padding: 32px;
-    text-align: center;
+    padding: 16px 24px;
+}
+
+.signal-layout {
+    display: flex;
+    align-items: center;
+    gap: 24px;
 }
 
 .signal-recommendation {
     font-size: 48px;
     font-weight: 600;
     color: #FFB347;
-    margin-bottom: 16px;
     letter-spacing: 0.05em;
+    flex-shrink: 0;
+    min-width: 200px;
 }
 
 .signal-recommendation.buy {
@@ -95,9 +103,8 @@ body {
     font-size: 14px;
     line-height: 1.6;
     color: #e4e4e4;
-    max-width: 800px;
-    margin: 0 auto;
     opacity: 0.9;
+    flex: 1;
 }
 
 /* Responsive grid */
@@ -121,7 +128,7 @@ body {
 }
 
 .indicator-content {
-    padding: 24px;
+    padding: 16px;
 }
 
 /* Main display section */
@@ -246,7 +253,7 @@ body {
 
 .bar-chart {
     flex: 1;
-    font-family: monospace;
+    font-family: 'Geist Mono', 'SF Mono', monospace;
 }
 
 /* Override base bar-chart styles for expanded state */
@@ -372,7 +379,7 @@ body {
 .bar-expanded .bar-chart-expanded.greed,
 .bar-expanded .bar-chart-expanded.neutral,
 .bar-expanded .bar-chart-expanded {
-    font-family: 'Courier New', monospace;
+    font-family: 'Geist Mono', 'SF Mono', monospace;
     font-size: 16px;
     letter-spacing: 1.5px;
     text-align: center;
@@ -538,4 +545,22 @@ body {
     font-size: 16px;
     color: #e4e4e4;
     transition: opacity 0.3s;
+}
+
+/* Add mobile responsive stacking for signal layout */
+@media (max-width: 575px) {
+    .signal-layout {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .signal-recommendation {
+        min-width: 0;
+        margin-bottom: 4px;
+    }
+
+    .signal-description {
+        font-size: 13px;
+    }
 } 

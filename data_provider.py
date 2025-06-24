@@ -3,6 +3,8 @@ import pandas as pd
 from io import BytesIO
 import json
 from llm_client import generate_fng_commentary, generate_aaii_commentary
+import re
+from datetime import datetime, date
 
 # --- Cache File Configuration ---
 FNG_CACHE_PATH = "cache/fng_cache.json"
@@ -164,6 +166,54 @@ def fetch_and_process_fear_and_greed():
         return None
 
 
+def _fetch_latest_sentiment_from_ycharts():
+    """Return a dict { 'date': datetime.date, 'bullish': float, 'neutral': float, 'bearish': float } or None on failure."""
+    series_urls = {
+        'bullish': 'https://ycharts.com/indicators/us_investor_sentiment_bullish',
+        'bearish': 'https://ycharts.com/indicators/us_investor_sentiment_bearish',
+        'neutral': 'https://ycharts.com/indicators/us_investor_sentiment_neutral'
+    }
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+    }
+    value_regex = re.compile(r"is at ([0-9.]+)%")
+    date_regex = re.compile(r"Latest Period\s*\|\s*([A-Za-z]{3} \d{2} \d{4})")
+    inline_regex = re.compile(r"([0-9.]+)%\s*for\s*Wk of\s*([A-Za-z]{3}\s+\d{2}\s+\d{4})", re.I)
+
+    results = {}
+    latest_dt = None
+    try:
+        for name, url in series_urls.items():
+            resp = requests.get(url, headers=headers, timeout=10)
+            resp.raise_for_status()
+            html = resp.text
+            # Primary parse: compact 'for Wk of' inline pattern
+            inline_match = inline_regex.search(html)
+            if inline_match:
+                pct_val = float(inline_match.group(1))
+                str_date = inline_match.group(2)
+            else:
+                # Fallback to separated labels
+                val_match = value_regex.search(html)
+                date_match = date_regex.search(html)
+                if not val_match or not date_match:
+                    raise ValueError(f"Could not parse {name} series from YCharts page")
+                pct_val = float(val_match.group(1))
+                str_date = date_match.group(1)
+            dt = datetime.strptime(str_date, '%b %d %Y').date()
+            results[name] = pct_val
+            if latest_dt is None:
+                latest_dt = dt
+            elif latest_dt != dt:
+                # YCharts pages should have same date; if not, choose latest and warn
+                latest_dt = max(latest_dt, dt)
+        results['date'] = latest_dt
+        return results
+    except Exception as exc:
+        print(f"⚠️ Failed fetching latest AAII sentiment from YCharts: {exc}")
+        return None
+
+
 def fetch_and_process_aaii_sentiment():
     """
     [MANUAL STEP REQUIRED]
@@ -206,6 +256,28 @@ def fetch_and_process_aaii_sentiment():
 
         # Sort by date to ensure proper ordering
         df = df.sort_values('Date')
+
+        # --------------------------------------------------
+        # Optionally append latest week from YCharts if newer
+        # --------------------------------------------------
+        latest_online = _fetch_latest_sentiment_from_ycharts()
+        if latest_online and 'date' in latest_online:
+            excel_max_date = df['Date'].max().date()
+            if latest_online['date'] > excel_max_date:
+                # Create row in same unit (fractions)
+                new_row = pd.DataFrame({
+                    'Date': [pd.Timestamp(latest_online['date'])],
+                    'Bullish': [latest_online['bullish'] / 100.0],
+                    'Neutral': [latest_online['neutral'] / 100.0],
+                    'Bearish': [latest_online['bearish'] / 100.0]
+                })
+                df = pd.concat([df, new_row], ignore_index=True)
+                df = df.sort_values('Date')
+                print(f"✅ Appended YCharts AAII data for {latest_online['date']}")
+            else:
+                print("YCharts AAII data not newer than Excel history; no append.")
+        else:
+            print("YCharts AAII data unavailable; using Excel-only history.")
 
         latest_data = df.iloc[-1]
         

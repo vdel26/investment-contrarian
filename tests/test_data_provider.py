@@ -67,15 +67,17 @@ class TestDataProvider(unittest.TestCase):
         data = fetch_and_process_fear_and_greed()
         self.assertIsNone(data)
 
+    @patch('data_provider._fetch_latest_sentiment_from_ycharts', return_value=None)
     @patch('data_provider.pd.read_excel')
     @patch('builtins.open')
-    def test_fetch_and_process_aaii_sentiment_success(self, mock_open, mock_read_excel):
+    def test_fetch_and_process_aaii_sentiment_success(self, mock_open, mock_read_excel, mock_ycharts):
         """Tests successful processing of AAII sentiment data from a local file."""
         mock_read_excel.return_value = self.aaii_sample_df
         
         data = fetch_and_process_aaii_sentiment()
         
-        mock_open.assert_called_with('sentiment.xls', 'rb')
+        # Ensure the function attempted to read the Excel file
+        mock_open.assert_any_call('sentiment.xls', 'rb')
         self.assertIsNotNone(data)
         self.assertEqual(data['report_date'], '2023-01-05')
         self.assertEqual(data['bullish'], 20.5)

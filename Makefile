@@ -10,7 +10,7 @@ run:
 
 test:
 	@echo "Running tests..."
-	@python -m unittest tests/test_data_provider.py
+	@python -m unittest discover -s tests -p 'test_*.py'
 
 update-cache:
 	@echo "Updating data cache..."
