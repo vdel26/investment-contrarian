@@ -154,20 +154,25 @@ class SSICache:
 
 
 def generate_target_months(num_months: int = 12) -> List[str]:
-    """Generate list of target months including future months to catch recent data."""
-    today = date.today().replace(day=1)
+    """Generate list of target months based on SSI publication timing.
+    
+    SSI data for month N is published in month N+1, so we should only look for
+    data that should realistically be available based on today's date.
+    """
+    today = date.today()
     months = []
     
-    # Include current and next month to catch recent data
-    months.append(today)
-    months.append(today + relativedelta(months=1))
+    # SSI data for month N is published in month N+1
+    # So the latest month we should have data for is last month
+    # (assuming we're early enough in current month that current month's data isn't out yet)
+    latest_available_month = today.replace(day=1) - relativedelta(months=1)
     
-    # Add past months
-    current = today
+    # Generate the last num_months starting from latest_available_month
+    current = latest_available_month
     for _ in range(num_months):
-        current -= relativedelta(months=1)
         months.append(current)
+        current -= relativedelta(months=1)
     
-    # Sort chronologically and format
+    # Sort chronologically (oldest first) and format
     months.sort()
     return [m.strftime("%B %Y") for m in months]

@@ -9,11 +9,12 @@ import pandas as pd
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import data_provider
+from indicators.aaii import _fetch_latest_sentiment_from_ycharts
 
 class TestYChartsScraper(unittest.TestCase):
     """Tests for the _fetch_latest_sentiment_from_ycharts helper."""
 
-    @patch('data_provider.requests.get')
+    @patch('indicators.aaii.requests.get')
     def test_scraper_parses_inline_pattern(self, mock_get):
         """Ensure the inline 'for Wk of' pattern is parsed correctly for all three series."""
         # HTML fragments for three pages with different values
@@ -31,7 +32,7 @@ class TestYChartsScraper(unittest.TestCase):
 
         mock_get.side_effect = _make_response
 
-        result = data_provider._fetch_latest_sentiment_from_ycharts()
+        result = _fetch_latest_sentiment_from_ycharts()
         self.assertIsNotNone(result)
         self.assertEqual(result['date'].strftime('%Y-%m-%d'), '2025-06-12')
         self.assertAlmostEqual(result['bullish'], 36.67)
@@ -44,8 +45,8 @@ class TestYChartsScraper(unittest.TestCase):
 class TestAAIIMerge(unittest.TestCase):
     """Tests the merging of latest YCharts data into the AAII dataframe."""
 
-    @patch('data_provider._fetch_latest_sentiment_from_ycharts')
-    @patch('data_provider.pd.read_excel')
+    @patch('indicators.aaii._fetch_latest_sentiment_from_ycharts')
+    @patch('indicators.aaii.pd.read_excel')
     @patch('builtins.open')
     def test_append_new_week(self, mock_open_file, mock_read_excel, mock_fetch_latest):
         """If YCharts week is newer, it should be appended and become the report_date."""
@@ -76,8 +77,8 @@ class TestAAIIMerge(unittest.TestCase):
         # Numbers should be rounded to 1 decimal according to implementation
         self.assertAlmostEqual(result['bullish'], 36.7, places=1)
 
-    @patch('data_provider._fetch_latest_sentiment_from_ycharts')
-    @patch('data_provider.pd.read_excel')
+    @patch('indicators.aaii._fetch_latest_sentiment_from_ycharts')
+    @patch('indicators.aaii.pd.read_excel')
     @patch('builtins.open')
     def test_no_append_when_not_newer(self, mock_open_file, mock_read_excel, mock_fetch_latest):
         """If YCharts week is not newer, the dataframe should remain unchanged."""

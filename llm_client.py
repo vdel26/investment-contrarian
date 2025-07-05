@@ -82,20 +82,35 @@ def generate_aaii_commentary(aaii_data: Dict) -> str:
     return _call_openai(messages)
 
 
-def generate_overall_analysis(fng: Dict, aaii: Dict) -> Dict:
-    """Return {'recommendation': <word>, 'commentary': <text>} using both sentiment sources."""
+def generate_overall_analysis(fng: Dict, aaii: Dict, ssi: Dict = None) -> Dict:
+    """Return {'recommendation': <word>, 'commentary': <text>} using sentiment sources."""
     score = fng.get("score")
     rating = fng.get("rating")
     bull = aaii.get("bullish")
     bear = aaii.get("bearish")
     spread = round(float(bull) - float(bear), 1) if bull is not None and bear is not None else None
 
-    user_prompt = (
-        "Act as a veteran contrarian investor reviewing sentiment data. "
+    # Build the prompt with F&G and AAII data
+    prompt_parts = [
+        "Act as a veteran contrarian investor reviewing sentiment data. ",
         f"CNN Fear & Greed: {score} ({rating}). AAII Bull {bull}%, Bear {bear}% (Spread {spread} pp). "
+    ]
+    
+    # Add SSI data if available
+    if ssi and isinstance(ssi, list) and len(ssi) > 0:
+        # Get the latest SSI value
+        latest_ssi = ssi[-1]  # Assuming sorted chronologically
+        ssi_level = latest_ssi.get("level")
+        ssi_date = latest_ssi.get("date")
+        if ssi_level and ssi_date:
+            prompt_parts.append(f"BofA SSI: {ssi_level}% ({ssi_date}). ")
+    
+    prompt_parts.append(
         "Issue a ONE-WORD recommendation from: STRONG SELL, SELL, HOLD, BUY, STRONG BUY, followed by a 35–40-word rationale. "
         "Format exactly as: RECOMMENDATION: <word>\nCOMMENTARY: <text>."
     )
+    
+    user_prompt = "".join(prompt_parts)
 
     messages = [
         {"role": "system", "content": _SYSTEM_PROMPT},
