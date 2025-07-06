@@ -1,5 +1,5 @@
 from flask import Flask, send_from_directory, jsonify
-from data_provider import get_fear_and_greed_data, get_aaii_sentiment_data, get_overall_analysis_data
+from data_provider import get_fear_and_greed_data, get_aaii_sentiment_data, get_ssi_data, get_overall_analysis_data
 
 app = Flask(__name__, static_folder='static', static_url_path='')
 
@@ -14,6 +14,7 @@ def serve_index():
 def get_market_data():
     fng_data = get_fear_and_greed_data()
     aaii_data = get_aaii_sentiment_data()
+    ssi_data = get_ssi_data()
     overall = get_overall_analysis_data()
 
     # The getter functions will return a dictionary with an 'error' key if they fail
@@ -24,6 +25,7 @@ def get_market_data():
     combined_data = {
         "fear_and_greed": fng_data,
         "aaii_sentiment": aaii_data,
+        "bank_of_america_ssi": ssi_data,
         "overall_analysis": overall
     }
     

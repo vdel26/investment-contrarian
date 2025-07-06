@@ -150,6 +150,94 @@
 
                 </div>
             </div>
+
+            <!-- Bank of America SSI -->
+            <div class="indicator-container">
+                <div class="box-header">
+                    <span class="box-title">BOFA SSI</span>
+                    <span id="ssi-meta" class="timestamp"></span>
+                </div>
+                <div class="indicator-content">
+                    <div class="main-display">
+                        <div id="ssi-value" class="index-value neutral">--%</div>
+                        <div id="ssi-rating" class="index-label neutral">LOADING</div>
+                        <div class="main-bar-container">
+                        <div class="main-bar">
+                            <div id="ssi-bar-fill" class="main-bar-fill" style="width: 50%; background: #999;"></div>
+                            <div id="ssi-bar-marker" class="main-bar-marker" style="left: 50%;"></div>
+                            <div class="zone-divider" style="left: 10%;"></div>
+                            <div class="zone-divider" style="left: 30%;"></div>
+                            <div class="zone-divider" style="left: 70%;"></div>
+                            <div class="zone-divider" style="left: 90%;"></div>
+                        </div>
+                        <div class="zone-labels">
+                            <span class="zone-label bearish">BEARISH<br>&lt;50%</span>
+                            <span class="zone-label neutral">NEUTRAL<br>50-55%</span>
+                            <span class="zone-label bullish">BULLISH<br>55-60%</span>
+                            <span class="zone-label extreme-bullish">EXTREME<br>&gt;60%</span>
+                        </div>
+                        <div id="ssi-main-stats" class="main-stats">Loading contrarian analysis...</div>
+                    </div>
+                </div>
+
+                <div id="ssi-components" class="ascii-bar">
+                    <!-- SSI Monthly Data Rendered Here -->
+                </div>
+
+                <div class="ascii-divider">─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─</div>
+
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection('ssi-history')">
+                        <span class="section-title">▶ HISTORICAL LEVELS</span>
+                        <span id="ssi-summary" class="section-summary"></span>
+                    </div>
+                    <div id="ssi-history-content" class="section-content" style="display: none;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>MONTH</th>
+                                    <th>LEVEL</th>
+                                    <th>SENTIMENT</th>
+                                    <th>CONFIDENCE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ssi-history-table">
+                                <!-- Historical SSI Data Rendered Here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- Pro Subscription Area -->
+            <div class="subscription-container">
+                <div class="box-header">
+                    <span class="box-title">DAILY ALERTS</span>
+                    <span class="timestamp">PRO</span>
+                </div>
+                <div class="subscription-content">
+                    <div class="subscription-main">
+                        <div class="subscription-icon">📧</div>
+                        <div class="subscription-title">Daily Market Alerts</div>
+                        <div class="subscription-description">
+                            Get contrarian signals delivered to your inbox every morning before market open.
+                        </div>
+                        
+                        <div class="subscription-features">
+                            <div class="feature-item">✓ Pre-market sentiment analysis</div>
+                            <div class="feature-item">✓ Contrarian opportunity alerts</div>
+                            <div class="feature-item">✓ Weekly deep-dive reports</div>
+                            <div class="feature-item">✓ Custom alert thresholds</div>
+                        </div>
+                        
+                        <div class="subscription-cta">
+                            <button class="cta-button">Subscribe to Alerts</button>
+                            <div class="pricing">$29/month • Cancel anytime</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div id="loading-indicator" style="display: none;">

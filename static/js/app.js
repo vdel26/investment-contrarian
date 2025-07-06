@@ -60,6 +60,11 @@ document.addEventListener('DOMContentLoaded', () => {
         renderFearGreed(fngDataWithHistorical);
         renderAaiiSentiment(data.aaii_sentiment);
         
+        // Render SSI if available
+        if (data.bank_of_america_ssi) {
+            renderSSI(data.bank_of_america_ssi);
+        }
+        
         const spread = data.aaii_sentiment.bullish - data.aaii_sentiment.bearish;
 
         if (data.overall_analysis && data.overall_analysis.recommendation) {
@@ -86,6 +91,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const aaiiMetaEl = document.getElementById('aaii-meta');
         if (aaiiMetaEl && data.aaii_sentiment.report_date) {
             aaiiMetaEl.textContent = `Weekly • ${data.aaii_sentiment.report_date}`;
+        }
+
+        const ssiMetaEl = document.getElementById('ssi-meta');
+        if (ssiMetaEl && data.bank_of_america_ssi && data.bank_of_america_ssi.length > 0) {
+            const latestSSI = data.bank_of_america_ssi[data.bank_of_america_ssi.length - 1];
+            if (latestSSI.date) {
+                ssiMetaEl.textContent = `Monthly • ${latestSSI.date}`;
+            }
         }
 
         const overallMetaEl = document.getElementById('overall-meta');
@@ -208,6 +221,79 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             document.getElementById('aaii-summary').textContent = `52W: ... to ... | Avg: ...`;
         }
+    }
+
+    function renderSSI(ssiData) {
+        if (!ssiData || !Array.isArray(ssiData) || ssiData.length === 0) {
+            console.error("No SSI data available");
+            return;
+        }
+
+        // Get the latest SSI value
+        const latestSSI = ssiData[ssiData.length - 1];
+        const ssiLevel = parseFloat(latestSSI.level);
+        
+        // Main display
+        const valueEl = document.getElementById('ssi-value');
+        const ratingEl = document.getElementById('ssi-rating');
+        valueEl.textContent = `${ssiLevel.toFixed(1)}%`;
+        
+        // Determine SSI rating based on contrarian interpretation
+        let rating, ratingClass;
+        if (ssiLevel < 50) {
+            rating = "BEARISH";
+            ratingClass = "bearish";
+        } else if (ssiLevel < 55) {
+            rating = "NEUTRAL";
+            ratingClass = "neutral";
+        } else if (ssiLevel < 60) {
+            rating = "BULLISH";
+            ratingClass = "bullish";
+        } else {
+            rating = "EXTREME BULLISH";
+            ratingClass = "extreme-bullish";
+        }
+        
+        ratingEl.textContent = rating;
+        updateElementClass(valueEl, ratingClass, ['bearish', 'neutral', 'bullish', 'extreme-bullish']);
+        updateElementClass(ratingEl, ratingClass, ['bearish', 'neutral', 'bullish', 'extreme-bullish']);
+
+        // Main bar (45-65% range with center at 55%)
+        const minRange = 45;
+        const maxRange = 65;
+        const barPercentage = ((ssiLevel - minRange) / (maxRange - minRange)) * 100;
+        const clampedBarPercentage = Math.max(0, Math.min(100, barPercentage));
+        
+        document.getElementById('ssi-bar-fill').style.width = `${clampedBarPercentage}%`;
+        document.getElementById('ssi-bar-marker').style.left = `${clampedBarPercentage}%`;
+        document.getElementById('ssi-bar-fill').style.background = getSSIBarColor(ssiLevel);
+        
+        // Main commentary - contrarian interpretation
+        let commentary;
+        if (ssiLevel >= 58) {
+            commentary = `High allocation (${ssiLevel.toFixed(1)}%) suggests widespread bullishness. Contrarian signal for potential market top.`;
+        } else if (ssiLevel <= 52) {
+            commentary = `Low allocation (${ssiLevel.toFixed(1)}%) indicates widespread bearishness. Contrarian opportunity for market bottom.`;
+        } else {
+            commentary = `Moderate allocation (${ssiLevel.toFixed(1)}%) suggests balanced sentiment. Watch for extreme readings.`;
+        }
+        document.getElementById('ssi-main-stats').textContent = commentary;
+        
+        // Components - show recent monthly data
+        const componentsContainer = document.getElementById('ssi-components');
+        componentsContainer.innerHTML = renderSSIComponents(ssiData);
+
+        // Historical table
+        const historyContainer = document.getElementById('ssi-history-table');
+        historyContainer.innerHTML = renderSSIHistory(ssiData);
+        
+        // Summary with 6-month range
+        const recentData = ssiData.slice(-6); // Last 6 months
+        const levels = recentData.map(d => parseFloat(d.level));
+        const minLevel = Math.min(...levels);
+        const maxLevel = Math.max(...levels);
+        const avgLevel = levels.reduce((sum, val) => sum + val, 0) / levels.length;
+        document.getElementById('ssi-summary').textContent = `6M: ${minLevel.toFixed(1)}% to ${maxLevel.toFixed(1)}% | Avg: ${avgLevel.toFixed(1)}%`;
     }
 
     function updateSignalRecommendation(fearGreedValue, bullBearSpread) {
@@ -684,6 +770,78 @@ document.addEventListener('DOMContentLoaded', () => {
         if (spread > 10) return 'bullish';
         if (spread < -10) return 'bearish';
         return 'neutral';
+    }
+
+    function getSSIBarColor(value) {
+        if (value < 50) return '#4169E1'; // Bearish (blue)
+        if (value < 55) return '#999';    // Neutral (gray)
+        if (value < 60) return '#FFB347'; // Bullish (orange)
+        return '#FF6B6B';                 // Extreme Bullish (red)
+    }
+
+    function renderSSIComponents(ssiData) {
+        // Show recent 6 months as simple monthly evolution list
+        const recentData = ssiData.slice(-6).reverse(); // Most recent first
+        
+        return recentData.map((dataPoint, index) => {
+            const level = parseFloat(dataPoint.level);
+            const monthYear = dataPoint.date;
+            const confidence = dataPoint.confidence || 'medium';
+            
+            // Determine sentiment zone
+            let sentimentZone;
+            if (level < 50) sentimentZone = 'bearish';
+            else if (level < 55) sentimentZone = 'neutral';
+            else if (level < 60) sentimentZone = 'bullish';
+            else sentimentZone = 'extreme-bullish';
+            
+            const displayLabel = index === 0 ? 'LATEST' : `${index}M AGO`;
+            const confidenceIndicator = confidence === 'high' ? '●' : confidence === 'medium' ? '◐' : '○';
+            
+            // Calculate change from previous month if available
+            let changeIndicator = '';
+            if (index < recentData.length - 1) {
+                const previousLevel = parseFloat(recentData[index + 1].level);
+                const change = level - previousLevel;
+                if (Math.abs(change) >= 0.1) {
+                    changeIndicator = change > 0 ? ' ↗' : ' ↘';
+                }
+            }
+            
+            return `
+                <div class="ssi-month-row">
+                    <span class="ssi-month-label">${displayLabel} ${monthYear}</span>
+                    <span class="ssi-month-value ${sentimentZone}">${level.toFixed(1)}%${changeIndicator}</span>
+                    <span class="confidence-indicator" title="Confidence: ${confidence}">${confidenceIndicator}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderSSIHistory(ssiData) {
+        // Show recent 6 months in table format
+        const recentData = ssiData.slice(-6).reverse(); // Most recent first
+        
+        return recentData.map((dataPoint, index) => {
+            const level = parseFloat(dataPoint.level);
+            let sentimentZone;
+            if (level < 50) sentimentZone = 'bearish';
+            else if (level < 55) sentimentZone = 'neutral';
+            else if (level < 60) sentimentZone = 'bullish';
+            else sentimentZone = 'extreme-bullish';
+            
+            const sentimentText = sentimentZone.replace('-', ' ').toUpperCase();
+            const confidenceText = (dataPoint.confidence || 'medium').toUpperCase();
+            
+            return `
+                <tr>
+                    <td>${dataPoint.date}</td>
+                    <td class="${sentimentZone}">${level.toFixed(1)}%</td>
+                    <td class="${sentimentZone}">${sentimentText}</td>
+                    <td>${confidenceText}</td>
+                </tr>
+            `;
+        }).join('');
     }
 
     // Toggle bar expansion for Fear & Greed components
