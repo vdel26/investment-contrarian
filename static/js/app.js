@@ -42,6 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('.dashboard-container').innerHTML = `<div style="text-align: center; padding: 50px; color: #F87171;"><h2>Error</h2><p>Could not load market data. Please try again later.</p><p><i>${error.message}</i></p></div>`;
         } finally {
             hideLoading();
+            // Initialize read more functionality after UI is loaded
+            setTimeout(initializeReadMore, 100);
         }
     }
 
@@ -886,6 +888,59 @@ document.addEventListener('DOMContentLoaded', () => {
             expanded.style.display = 'block';
             barRow.classList.add('expanded');
         }
+    }
+
+    // Read more functionality
+    function initializeReadMore() {
+        // Target signal descriptions, component descriptions, and main stats
+        const descriptions = document.querySelectorAll('.signal-description, .component-description, .main-stats');
+        console.log('Found descriptions:', descriptions.length);
+        
+        descriptions.forEach((description, index) => {
+            const text = description.textContent.trim();
+            console.log(`Description ${index} length:`, text.length, 'chars');
+            
+            // Check if text is longer than ~200 characters (roughly 3 lines)
+            if (text.length > 200) {
+                console.log('Adding read more to description', index);
+                
+                const words = text.split(' ');
+                // Use 25 words on mobile, 30 on desktop
+                const isMobile = window.innerWidth < 768;
+                const wordLimit = isMobile ? 25 : 30;
+                const truncatedText = words.slice(0, wordLimit).join(' ');
+                const fullText = text;
+                
+                // Create read more link
+                const readMoreLink = document.createElement('span');
+                readMoreLink.innerHTML = ' <span class="read-more-link">read more</span>';
+                readMoreLink.style.cursor = 'pointer';
+                
+                // Create read less link
+                const readLessLink = document.createElement('span');
+                readLessLink.innerHTML = ' <span class="read-more-link">read less</span>';
+                readLessLink.style.cursor = 'pointer';
+                
+                // Set up initial truncated state with inline read more
+                description.innerHTML = truncatedText;
+                description.appendChild(readMoreLink);
+                
+                // Add click handlers
+                readMoreLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Read more clicked');
+                    description.innerHTML = fullText;
+                    description.appendChild(readLessLink);
+                });
+                
+                readLessLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Read less clicked');
+                    description.innerHTML = truncatedText;
+                    description.appendChild(readMoreLink);
+                });
+            }
+        });
     }
 
     // --- Init ---
