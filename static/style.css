@@ -91,6 +91,12 @@ body {
     gap: 16px;
 }
 
+@media (max-width: 767px) {
+    .header-controls {
+        display: none !important;
+    }
+}
+
 .header-subscribe-btn {
     background: linear-gradient(135deg, #ff8c00, #ff6b00);
     color: #000;
@@ -123,6 +129,52 @@ body {
     background: linear-gradient(135deg, #ff9500, #ff7500);
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(255, 140, 0, 0.4);
+}
+
+/* Mobile Sticky Subscribe Button */
+.mobile-sticky-subscribe {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .mobile-sticky-subscribe {
+        display: block;
+    }
+    
+    .mobile-subscribe-btn {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background: linear-gradient(135deg, #ff8c00, #ff6b00);
+        color: #000;
+        border: none;
+        border-radius: 0;
+        padding: 0 16px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        transition: all 0.2s;
+        height: 28px;
+        min-height: 28px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .mobile-subscribe-btn:hover {
+        background: linear-gradient(135deg, #ff9500, #ff7500);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+    }
+    
+    body {
+        padding-top: 44px;
+    }
 }
 
 /* Signal Analysis Frame */
