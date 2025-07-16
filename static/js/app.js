@@ -945,4 +945,99 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Init ---
     initDashboard();
-}); 
+});
+
+// Subscription Modal Functions (Global scope for HTML onclick)
+function openSubscriptionModal() {
+    const modal = document.getElementById('subscription-modal');
+    const emailInput = document.getElementById('email-input');
+    const form = document.getElementById('subscription-form');
+    const message = document.getElementById('subscription-message');
+    
+    // Reset form
+    form.reset();
+    message.style.display = 'none';
+    
+    // Show modal
+    modal.style.display = 'flex';
+    
+    // Focus on email input
+    setTimeout(() => emailInput.focus(), 100);
+}
+
+function closeSubscriptionModal() {
+    const modal = document.getElementById('subscription-modal');
+    modal.style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('subscription-modal');
+    if (event.target === modal) {
+        closeSubscriptionModal();
+    }
+}
+
+// Handle subscription form submission
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('subscription-form');
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const emailInput = document.getElementById('email-input');
+            const submitButton = document.getElementById('subscribe-submit');
+            const message = document.getElementById('subscription-message');
+            
+            const email = emailInput.value.trim();
+            
+            if (!email) {
+                showSubscriptionMessage('Please enter your email address', 'error');
+                return;
+            }
+            
+            // Disable form during submission
+            submitButton.disabled = true;
+            submitButton.textContent = 'SUBSCRIBING...';
+            
+            try {
+                const response = await fetch('/api/subscribe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSubscriptionMessage(result.message, 'success');
+                    emailInput.value = '';
+                    
+                    // Close modal after 2 seconds
+                    setTimeout(() => {
+                        closeSubscriptionModal();
+                    }, 2000);
+                } else {
+                    showSubscriptionMessage(result.message, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Subscription error:', error);
+                showSubscriptionMessage('An error occurred. Please try again.', 'error');
+            } finally {
+                // Re-enable form
+                submitButton.disabled = false;
+                submitButton.textContent = 'SUBSCRIBE';
+            }
+        });
+    }
+});
+
+function showSubscriptionMessage(text, type) {
+    const message = document.getElementById('subscription-message');
+    message.textContent = text;
+    message.className = `message ${type}`;
+    message.style.display = 'block';
+} 

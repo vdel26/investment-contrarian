@@ -1,5 +1,6 @@
-from flask import Flask, send_from_directory, jsonify
+from flask import Flask, send_from_directory, jsonify, request
 from data_provider import get_fear_and_greed_data, get_aaii_sentiment_data, get_ssi_data, get_overall_analysis_data
+from subscribers import add_subscriber, remove_subscriber, get_subscriber_stats
 
 app = Flask(__name__, static_folder='static', static_url_path='')
 
@@ -30,6 +31,77 @@ def get_market_data():
     }
     
     return jsonify(combined_data)
+
+
+@app.route('/api/subscribe', methods=['POST'])
+def subscribe():
+    """Subscribe to daily email alerts."""
+    try:
+        # Get email from request
+        data = request.get_json()
+        if not data or 'email' not in data:
+            return jsonify({
+                "success": False,
+                "message": "Email address is required"
+            }), 400
+        
+        email = data['email']
+        
+        # Add subscriber
+        result = add_subscriber(email)
+        
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "An error occurred while processing your subscription"
+        }), 500
+
+
+@app.route('/api/unsubscribe', methods=['POST'])
+def unsubscribe():
+    """Unsubscribe from daily email alerts."""
+    try:
+        # Get email from request
+        data = request.get_json()
+        if not data or 'email' not in data:
+            return jsonify({
+                "success": False,
+                "message": "Email address is required"
+            }), 400
+        
+        email = data['email']
+        
+        # Remove subscriber
+        result = remove_subscriber(email)
+        
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "An error occurred while processing your unsubscription"
+        }), 500
+
+
+@app.route('/api/subscribers/stats', methods=['GET'])
+def subscriber_stats():
+    """Get subscriber statistics (for admin use)."""
+    try:
+        stats = get_subscriber_stats()
+        return jsonify(stats), 200
+    except Exception as e:
+        return jsonify({
+            "error": "Failed to retrieve subscriber statistics"
+        }), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001) 

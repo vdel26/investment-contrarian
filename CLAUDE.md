@@ -81,6 +81,9 @@ External APIs → Fetcher Functions → Cache Files → Getter Functions → Fla
 OPENAI_API_KEY     # Required for LLM commentary generation
 SERPAPI_KEY        # Required for SSI article searching  
 OPENAI_MODEL       # Optional, defaults to "gpt-4o"
+RESEND_API_KEY     # Required for email notifications
+FROM_EMAIL         # Email address for sending notifications
+FROM_NAME          # Optional, defaults to "Market Sentiment Terminal"
 ```
 
 ## Cache Files
