@@ -48,7 +48,7 @@ DASHBOARD_URL=https://your-app-name.onrender.com
 2. Create new disk:
    - **Name**: `investment-contrarian-data`
    - **Size**: 1 GB
-   - **Mount Path**: `/opt/render/project/src/data`
+   - **Mount Path**: `/data`
 
 ### 5. Create Cron Job Service
 1. Click "New" → "Cron Job"

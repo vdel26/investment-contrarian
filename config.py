@@ -5,14 +5,25 @@ Configuration module for environment-specific settings.
 import os
 from pathlib import Path
 
-# Base directory - current working directory
-BASE_DIR = Path.cwd()
+# Environment variables
+FLASK_ENV = os.environ.get('FLASK_ENV', 'development')
+IS_PRODUCTION = FLASK_ENV == 'production'
 
-# Data directories
-CACHE_DIR = BASE_DIR / "cache"
-DATA_DIR = BASE_DIR / "data"
-LOGS_DIR = BASE_DIR / "logs"
-EMAIL_TEMPLATES_DIR = BASE_DIR / "email_templates"
+# Base directory - handle production vs development
+if IS_PRODUCTION and os.path.exists('/data'):
+    # Production: use mounted disk
+    BASE_DIR = Path('/data')
+    DATA_DIR = BASE_DIR
+    CACHE_DIR = BASE_DIR / "cache"
+    LOGS_DIR = BASE_DIR / "logs"
+    EMAIL_TEMPLATES_DIR = Path.cwd() / "email_templates"  # Templates stay in app directory
+else:
+    # Development: use current working directory
+    BASE_DIR = Path.cwd()
+    CACHE_DIR = BASE_DIR / "cache"
+    DATA_DIR = BASE_DIR / "data"
+    LOGS_DIR = BASE_DIR / "logs"
+    EMAIL_TEMPLATES_DIR = BASE_DIR / "email_templates"
 
 # Ensure directories exist
 CACHE_DIR.mkdir(exist_ok=True)
@@ -25,10 +36,6 @@ FNG_CACHE_FILE = CACHE_DIR / "fng_cache.json"
 AAII_CACHE_FILE = CACHE_DIR / "aaii_cache.json"
 SSI_CACHE_FILE = CACHE_DIR / "ssi_cache.json"
 OVERALL_CACHE_FILE = CACHE_DIR / "overall_cache.json"
-
-# Environment variables
-FLASK_ENV = os.environ.get('FLASK_ENV', 'development')
-IS_PRODUCTION = FLASK_ENV == 'production'
 
 # API Keys (required in production)
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
