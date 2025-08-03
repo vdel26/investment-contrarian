@@ -1,0 +1,48 @@
+═══════════════════════════════════════════════════════════
+MARKET SENTIMENT TERMINAL
+Daily Alert • {{date}}
+═══════════════════════════════════════════════════════════
+
+CONTRARIAN SIGNAL: {{recommendation}}
+{{commentary}}
+
+───────────────────────────────────────────────────────────
+SENTIMENT INDICATORS
+───────────────────────────────────────────────────────────
+
+CNN FEAR & GREED INDEX
+Score: {{fng_score}}/100 ({{fng_rating}})
+{{fng_description}}
+
+AAII SENTIMENT SURVEY
+Bull-Bear Spread: {{aaii_spread}}%
+Bullish: {{aaii_bullish}}% | Bearish: {{aaii_bearish}}%
+{{aaii_description}}
+
+BANK OF AMERICA SSI
+Latest: {{ssi_latest_value}}% ({{ssi_latest_month}})
+Sentiment: {{ssi_sentiment}}
+{{ssi_description}}
+
+Recent SSI Levels:
+{{ssi_history_text}}
+
+───────────────────────────────────────────────────────────
+KEY METRICS SUMMARY
+───────────────────────────────────────────────────────────
+
+Fear & Greed: {{fng_score}}/100 ({{fng_rating}})
+AAII Spread: {{aaii_spread}}% ({{aaii_description}})
+SSI Level: {{ssi_latest_value}}% ({{ssi_sentiment}})
+
+Contrarian Signal: {{recommendation}} - {{commentary}}
+
+───────────────────────────────────────────────────────────
+
+Market Sentiment Terminal • Daily Alert delivered {{timestamp}}
+This analysis uses contrarian investment principles to identify market sentiment extremes.
+
+View Dashboard: {{dashboard_url}}
+Unsubscribe: {{unsubscribe_url}}
+
+═══════════════════════════════════════════════════════════

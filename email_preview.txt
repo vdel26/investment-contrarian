@@ -1,0 +1,51 @@
+═══════════════════════════════════════════════════════════
+MARKET SENTIMENT TERMINAL
+Daily Alert • July 17, 2025
+═══════════════════════════════════════════════════════════
+
+CONTRARIAN SIGNAL: SELL
+Elevated CNN Fear & Greed index signals extreme greed, suggesting potential overbought conditions. AAII sentiment shows bears slightly outnumber bulls, but not significantly. BofA SSI at 54.6% is neutral. Overall, sentiment implies excessive optimism, warranting caution.
+
+───────────────────────────────────────────────────────────
+SENTIMENT INDICATORS
+───────────────────────────────────────────────────────────
+
+CNN FEAR & GREED INDEX
+Score: 77.9714285714286/100 (extreme greed)
+Current reading indicates extreme greed sentiment in the market.
+
+AAII SENTIMENT SURVEY
+Bull-Bear Spread: -5.2%
+Bullish: 35.1% | Bearish: 40.3%
+Sentiment is relatively balanced.
+
+BANK OF AMERICA SSI
+Latest: 54.6% (2025-06)
+Sentiment: Neutral
+Between 50-55% indicates neutral sentiment.
+
+Recent SSI Levels:
+2025-06: 54.6%
+2025-05: 55.0%
+2025-04: 54.5%
+2025-03: 56.1%
+
+───────────────────────────────────────────────────────────
+KEY METRICS SUMMARY
+───────────────────────────────────────────────────────────
+
+Fear & Greed: 77.9714285714286/100 (extreme greed)
+AAII Spread: -5.2% (Sentiment is relatively balanced.)
+SSI Level: 54.6% (Neutral)
+
+Contrarian Signal: SELL - Elevated CNN Fear & Greed index signals extreme greed, suggesting potential overbought conditions. AAII sentiment shows bears slightly outnumber bulls, but not significantly. BofA SSI at 54.6% is neutral. Overall, sentiment implies excessive optimism, warranting caution.
+
+───────────────────────────────────────────────────────────
+
+Market Sentiment Terminal • Daily Alert delivered 2025-07-17 12:04:37 ET
+This analysis uses contrarian investment principles to identify market sentiment extremes.
+
+View Dashboard: https://your-dashboard-url.com
+Unsubscribe: https://your-dashboard-url.com/unsubscribe
+
+═══════════════════════════════════════════════════════════
