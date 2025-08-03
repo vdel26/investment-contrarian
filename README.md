@@ -19,13 +19,13 @@ make update-cache
 
 ```bash
 # Preview email content
-python email_content_generator.py preview
+make email-preview
 
 # Send test email
-python email_content_generator.py test your@email.com
+make email-test EMAIL=your@email.com
 
 # Test email service
-python email_service.py test your@email.com
+make email-test-service EMAIL=your@email.com
 ```
 
 ## Environment Variables
