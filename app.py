@@ -13,24 +13,43 @@ def serve_index():
 
 @app.route('/api/market-data')
 def get_market_data():
-    fng_data = get_fear_and_greed_data()
-    aaii_data = get_aaii_sentiment_data()
-    ssi_data = get_ssi_data()
-    overall = get_overall_analysis_data()
+    try:
+        fng_data = get_fear_and_greed_data()
+        aaii_data = get_aaii_sentiment_data()
+        ssi_data = get_ssi_data()
+        overall = get_overall_analysis_data()
 
-    # The getter functions will return a dictionary with an 'error' key if they fail
-    if "error" in fng_data or "error" in aaii_data:
-        # We can optionally log the specific errors here
-        return jsonify({"error": "Failed to load market data from cache."}), 500
+        # Log the data status for debugging
+        print(f"F&G data: {'error' in fng_data if isinstance(fng_data, dict) else 'loaded'}")
+        print(f"AAII data: {'error' in aaii_data if isinstance(aaii_data, dict) else 'loaded'}")
+        print(f"SSI data: {'error' in ssi_data if isinstance(ssi_data, dict) else 'loaded'}")
+        print(f"Overall data: {'error' in overall if isinstance(overall, dict) else 'loaded'}")
 
-    combined_data = {
-        "fear_and_greed": fng_data,
-        "aaii_sentiment": aaii_data,
-        "bank_of_america_ssi": ssi_data,
-        "overall_analysis": overall
-    }
+        # The getter functions will return a dictionary with an 'error' key if they fail
+        if (isinstance(fng_data, dict) and "error" in fng_data) or (isinstance(aaii_data, dict) and "error" in aaii_data):
+            error_details = []
+            if isinstance(fng_data, dict) and "error" in fng_data:
+                error_details.append(f"F&G: {fng_data['error']}")
+            if isinstance(aaii_data, dict) and "error" in aaii_data:
+                error_details.append(f"AAII: {aaii_data['error']}")
+            
+            print(f"Market data errors: {'; '.join(error_details)}")
+            return jsonify({"error": "Failed to load market data from cache.", "details": error_details}), 500
+
+        combined_data = {
+            "fear_and_greed": fng_data,
+            "aaii_sentiment": aaii_data,
+            "bank_of_america_ssi": ssi_data,
+            "overall_analysis": overall
+        }
+        
+        return jsonify(combined_data)
     
-    return jsonify(combined_data)
+    except Exception as e:
+        print(f"Unexpected error in get_market_data: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": "Internal server error loading market data"}), 500
 
 
 @app.route('/api/subscribe', methods=['POST'])
@@ -101,6 +120,54 @@ def subscriber_stats():
         return jsonify({
             "error": "Failed to retrieve subscriber statistics"
         }), 500
+
+
+@app.route('/debug/paths', methods=['GET'])
+def debug_paths():
+    """Debug endpoint to check file paths and permissions."""
+    import os
+    from pathlib import Path
+    from config import CACHE_DIR, DATA_DIR, LOGS_DIR, IS_PRODUCTION
+    
+    debug_info = {
+        'is_production': IS_PRODUCTION,
+        'current_working_directory': str(Path.cwd()),
+        'config_paths': {
+            'cache_dir': str(CACHE_DIR),
+            'data_dir': str(DATA_DIR),
+            'logs_dir': str(LOGS_DIR)
+        },
+        'directory_status': {
+            'cache_exists': CACHE_DIR.exists(),
+            'data_exists': DATA_DIR.exists(),
+            'logs_exists': LOGS_DIR.exists()
+        },
+        'cache_files': {},
+        'environment_vars': {
+            'FLASK_ENV': os.environ.get('FLASK_ENV'),
+            'has_openai_key': bool(os.environ.get('OPENAI_API_KEY')),
+            'has_serpapi_key': bool(os.environ.get('SERPAPI_KEY')),
+            'has_resend_key': bool(os.environ.get('RESEND_API_KEY'))
+        }
+    }
+    
+    # Check cache files
+    cache_files = ['fng_cache.json', 'aaii_cache.json', 'ssi_cache.json', 'overall_cache.json']
+    for cache_file in cache_files:
+        file_path = CACHE_DIR / cache_file
+        debug_info['cache_files'][cache_file] = {
+            'exists': file_path.exists(),
+            'path': str(file_path)
+        }
+        if file_path.exists():
+            try:
+                stat = file_path.stat()
+                debug_info['cache_files'][cache_file]['size'] = stat.st_size
+                debug_info['cache_files'][cache_file]['modified'] = stat.st_mtime
+            except Exception as e:
+                debug_info['cache_files'][cache_file]['error'] = str(e)
+    
+    return jsonify(debug_info)
 
 
 @app.route('/health', methods=['GET'])
