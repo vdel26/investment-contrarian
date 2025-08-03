@@ -8,3 +8,6 @@ __pycache__/
 .cursorrules
 cache/ 
 logs/
+notes
+data
+email_preview.*

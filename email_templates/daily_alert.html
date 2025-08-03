@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Market Sentiment Alert</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+            background-color: #0a0a0a;
+            color: #e4e4e4;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #050505;
+            border: 1px solid #333;
+        }
+        
+        /* Header */
+        .email-header {
+            background-color: #111;
+            border-bottom: 1px solid #333;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header-title {
+            color: #ff8c00;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            margin-bottom: 5px;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+            text-transform: uppercase;
+        }
+        
+        .header-subtitle {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Main content */
+        .email-content {
+            padding: 20px;
+        }
+        
+        /* Recommendation section */
+        .recommendation-section {
+            background-color: #111;
+            border: 1px solid #333;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .recommendation-label {
+            color: #ff8c00;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+        }
+        
+        .recommendation-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: 0.05em;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+        }
+        
+        .recommendation-value.buy { color: #4ADE80; }
+        .recommendation-value.sell { color: #F87171; }
+        .recommendation-value.hold { color: #FFB347; }
+        
+        .recommendation-commentary {
+            color: #ccc;
+            font-size: 14px;
+            line-height: 1.5;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+            text-align: left;
+        }
+        
+        /* Indicators grid */
+        .indicators-grid {
+            display: table;
+            width: 100%;
+            margin-bottom: 20px;
+            table-layout: fixed;
+        }
+        
+        .indicator-row {
+            display: table-row;
+        }
+        
+        .indicator-cell {
+            display: table-cell;
+            width: 50%;
+            padding: 10px 0;
+            vertical-align: top;
+        }
+        
+        .indicator-box {
+            background-color: #111;
+            border: 1px solid #333;
+            padding: 15px;
+            height: 100%;
+        }
+        
+        .indicator-title {
+            color: #ff8c00;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+        }
+        
+        .indicator-value {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+        }
+        
+        .indicator-label {
+            font-size: 12px;
+            color: #ccc;
+            margin-bottom: 10px;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+        }
+        
+        .indicator-description {
+            font-size: 11px;
+            color: #888;
+            line-height: 1.4;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+        }
+        
+        .indicator-historical {
+            font-size: 10px;
+            color: #666;
+            margin-top: 8px;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+        }
+        
+        /* Color classes for indicators */
+        .fear-extreme { color: #7B68EE; }
+        .fear { color: #4169E1; }
+        .neutral { color: #999; }
+        .greed { color: #FFB347; }
+        .greed-extreme { color: #FF6B6B; }
+        .bearish { color: #4169E1; }
+        .bullish { color: #FFB347; }
+        .extreme-bullish { color: #FF6B6B; }
+        
+        /* SSI section (full width) */
+        .ssi-section {
+            background-color: #111;
+            border: 1px solid #333;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .ssi-content {
+            display: table;
+            width: 100%;
+        }
+        
+        .ssi-main {
+            display: table-cell;
+            width: 60%;
+            padding-right: 15px;
+        }
+        
+        .ssi-data {
+            display: table-cell;
+            width: 40%;
+            vertical-align: top;
+        }
+        
+        .ssi-history {
+            font-size: 10px;
+            color: #666;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+        }
+        
+        .ssi-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 3px;
+        }
+        
+        .ssi-month {
+            display: table-cell;
+            width: 60%;
+            padding-right: 10px;
+        }
+        
+        .ssi-value {
+            display: table-cell;
+            width: 40%;
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        /* Footer */
+        .email-footer {
+            background-color: #111;
+            border-top: 1px solid #333;
+            padding: 15px 20px;
+            font-size: 10px;
+            color: #666;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+        }
+        
+        .footer-info {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links {
+            text-align: center;
+        }
+        
+        .footer-links a {
+            color: #ff8c00;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Mobile responsive */
+        @media only screen and (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .email-container {
+                width: 100% !important;
+            }
+            
+            .indicators-grid {
+                display: block;
+            }
+            
+            .indicator-row {
+                display: block;
+            }
+            
+            .indicator-cell {
+                display: block;
+                width: 100% !important;
+                margin-bottom: 10px;
+            }
+            
+            .indicator-box {
+                width: 100% !important;
+            }
+            
+            .ssi-content {
+                display: block;
+            }
+            
+            .ssi-main, .ssi-data {
+                display: block;
+                width: 100% !important;
+                padding-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .recommendation-value {
+                font-size: 28px;
+            }
+            
+            .indicator-value {
+                font-size: 20px;
+            }
+            
+            /* Mobile: Show value and label inline with right alignment */
+            .mobile-inline {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                margin-bottom: 8px;
+            }
+            
+            .mobile-inline .indicator-value {
+                margin-bottom: 0;
+            }
+            
+            .mobile-inline .indicator-label {
+                margin-bottom: 0;
+                font-size: 14px;
+                text-align: right;
+                text-transform: uppercase;
+            }
+            
+            .ssi-section {
+                width: 100% !important;
+                box-sizing: border-box;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="email-header">
+            <div class="header-title">Daily Market Sentiment Report {{date}}</div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="email-content">
+            <!-- Recommendation Section -->
+            <div class="recommendation-section">
+                <div class="recommendation-label">CONTRARIAN SIGNAL</div>
+                <div class="recommendation-value {{recommendation_class}}">{{recommendation}}</div>
+                <div class="recommendation-commentary">{{commentary}}</div>
+            </div>
+            
+            <!-- Indicators Grid -->
+            <div class="indicators-grid">
+                <div class="indicator-row">
+                    <!-- Fear & Greed -->
+                    <div class="indicator-cell">
+                        <div class="indicator-box">
+                            <div class="indicator-title">CNN Fear & Greed Index</div>
+                            <div class="mobile-inline">
+                                <div class="indicator-value {{fng_class}}">{{fng_score}}</div>
+                                <div class="indicator-label">{{fng_rating}}</div>
+                            </div>
+                            <div class="indicator-description">{{fng_description}}</div>
+                            <div class="indicator-historical">1D AGO: {{fng_1d_ago}} | 1W AGO: {{fng_1w_ago}}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- AAII Sentiment -->
+                    <div class="indicator-cell">
+                        <div class="indicator-box">
+                            <div class="indicator-title">AAII Sentiment Survey</div>
+                            <div class="mobile-inline">
+                                <div class="indicator-value {{aaii_class}}">{{aaii_spread}}%</div>
+                                <div class="indicator-label">Bull-Bear Spread</div>
+                            </div>
+                            <div class="indicator-description">Bullish: {{aaii_bullish}}% | Bearish: {{aaii_bearish}}%</div>
+                            <div class="indicator-historical">1W AGO: {{aaii_1w_ago}}% | 1M AGO: {{aaii_1m_ago}}%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SSI Section -->
+            <div class="ssi-section">
+                <div class="indicator-title">Bank of America SSI</div>
+                <div class="ssi-content">
+                    <div class="ssi-main">
+                        <div class="mobile-inline">
+                            <div class="indicator-value {{ssi_class}}">{{ssi_latest_value}}%</div>
+                            <div class="indicator-label">{{ssi_sentiment}}</div>
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-bottom: 10px; font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;">{{ssi_latest_month}}</div>
+                        <div class="indicator-description">{{ssi_description}}</div>
+                    </div>
+                    <div class="ssi-data">
+                        <div class="ssi-history">RECENT LEVELS:</div>
+                        {{ssi_history}}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Terminal Link -->
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="{{dashboard_url}}" style="display: block; background-color: #ff8c00; color: #000; padding: 8px 24px; text-decoration: none; font-weight: 600; letter-spacing: 0.05em; border-radius: 3px;">SEE FULL REPORT</a>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="email-footer">
+            <div class="footer-info">
+                <strong>Market Sentiment Terminal</strong> • Daily Alert delivered {{timestamp}}<br>
+                This analysis uses contrarian investment principles to identify market sentiment extremes.
+            </div>
+            <div class="footer-links">
+                <a href="{{dashboard_url}}">View Dashboard</a> • 
+                <a href="{{unsubscribe_url}}">Unsubscribe</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

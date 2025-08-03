@@ -42,6 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('.dashboard-container').innerHTML = `<div style="text-align: center; padding: 50px; color: #F87171;"><h2>Error</h2><p>Could not load market data. Please try again later.</p><p><i>${error.message}</i></p></div>`;
         } finally {
             hideLoading();
+            // Initialize read more functionality after UI is loaded
+            setTimeout(initializeReadMore, 100);
         }
     }
 
@@ -59,6 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         renderFearGreed(fngDataWithHistorical);
         renderAaiiSentiment(data.aaii_sentiment);
+        
+        // Render SSI if available
+        if (data.bank_of_america_ssi) {
+            renderSSI(data.bank_of_america_ssi);
+        }
         
         const spread = data.aaii_sentiment.bullish - data.aaii_sentiment.bearish;
 
@@ -86,6 +93,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const aaiiMetaEl = document.getElementById('aaii-meta');
         if (aaiiMetaEl && data.aaii_sentiment.report_date) {
             aaiiMetaEl.textContent = `Weekly • ${data.aaii_sentiment.report_date}`;
+        }
+
+        const ssiMetaEl = document.getElementById('ssi-meta');
+        if (ssiMetaEl && data.bank_of_america_ssi && data.bank_of_america_ssi.length > 0) {
+            const latestSSI = data.bank_of_america_ssi[data.bank_of_america_ssi.length - 1];
+            if (latestSSI.date) {
+                ssiMetaEl.textContent = `Monthly • ${latestSSI.date}`;
+            }
         }
 
         const overallMetaEl = document.getElementById('overall-meta');
@@ -208,6 +223,79 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             document.getElementById('aaii-summary').textContent = `52W: ... to ... | Avg: ...`;
         }
+    }
+
+    function renderSSI(ssiData) {
+        if (!ssiData || !Array.isArray(ssiData) || ssiData.length === 0) {
+            console.error("No SSI data available");
+            return;
+        }
+
+        // Get the latest SSI value
+        const latestSSI = ssiData[ssiData.length - 1];
+        const ssiLevel = parseFloat(latestSSI.level);
+        
+        // Main display
+        const valueEl = document.getElementById('ssi-value');
+        const ratingEl = document.getElementById('ssi-rating');
+        valueEl.textContent = `${ssiLevel.toFixed(1)}%`;
+        
+        // Determine SSI rating based on contrarian interpretation
+        let rating, ratingClass;
+        if (ssiLevel < 50) {
+            rating = "BEARISH";
+            ratingClass = "bearish";
+        } else if (ssiLevel < 55) {
+            rating = "NEUTRAL";
+            ratingClass = "neutral";
+        } else if (ssiLevel < 60) {
+            rating = "BULLISH";
+            ratingClass = "bullish";
+        } else {
+            rating = "EXTREME BULLISH";
+            ratingClass = "extreme-bullish";
+        }
+        
+        ratingEl.textContent = rating;
+        updateElementClass(valueEl, ratingClass, ['bearish', 'neutral', 'bullish', 'extreme-bullish']);
+        updateElementClass(ratingEl, ratingClass, ['bearish', 'neutral', 'bullish', 'extreme-bullish']);
+
+        // Main bar (45-65% range with center at 55%)
+        const minRange = 45;
+        const maxRange = 65;
+        const barPercentage = ((ssiLevel - minRange) / (maxRange - minRange)) * 100;
+        const clampedBarPercentage = Math.max(0, Math.min(100, barPercentage));
+        
+        document.getElementById('ssi-bar-fill').style.width = `${clampedBarPercentage}%`;
+        document.getElementById('ssi-bar-marker').style.left = `${clampedBarPercentage}%`;
+        document.getElementById('ssi-bar-fill').style.background = getSSIBarColor(ssiLevel);
+        
+        // Main commentary - contrarian interpretation
+        let commentary;
+        if (ssiLevel >= 58) {
+            commentary = `High allocation (${ssiLevel.toFixed(1)}%) suggests widespread bullishness. Contrarian signal for potential market top.`;
+        } else if (ssiLevel <= 52) {
+            commentary = `Low allocation (${ssiLevel.toFixed(1)}%) indicates widespread bearishness. Contrarian opportunity for market bottom.`;
+        } else {
+            commentary = `Moderate allocation (${ssiLevel.toFixed(1)}%) suggests balanced sentiment. Watch for extreme readings.`;
+        }
+        document.getElementById('ssi-main-stats').textContent = commentary;
+        
+        // Components - show recent monthly data
+        const componentsContainer = document.getElementById('ssi-components');
+        componentsContainer.innerHTML = renderSSIComponents(ssiData);
+
+        // Historical table
+        const historyContainer = document.getElementById('ssi-history-table');
+        historyContainer.innerHTML = renderSSIHistory(ssiData);
+        
+        // Summary with 6-month range
+        const recentData = ssiData.slice(-6); // Last 6 months
+        const levels = recentData.map(d => parseFloat(d.level));
+        const minLevel = Math.min(...levels);
+        const maxLevel = Math.max(...levels);
+        const avgLevel = levels.reduce((sum, val) => sum + val, 0) / levels.length;
+        document.getElementById('ssi-summary').textContent = `6M: ${minLevel.toFixed(1)}% to ${maxLevel.toFixed(1)}% | Avg: ${avgLevel.toFixed(1)}%`;
     }
 
     function updateSignalRecommendation(fearGreedValue, bullBearSpread) {
@@ -686,6 +774,78 @@ document.addEventListener('DOMContentLoaded', () => {
         return 'neutral';
     }
 
+    function getSSIBarColor(value) {
+        if (value < 50) return '#4169E1'; // Bearish (blue)
+        if (value < 55) return '#999';    // Neutral (gray)
+        if (value < 60) return '#FFB347'; // Bullish (orange)
+        return '#FF6B6B';                 // Extreme Bullish (red)
+    }
+
+    function renderSSIComponents(ssiData) {
+        // Show recent 6 months as simple monthly evolution list
+        const recentData = ssiData.slice(-6).reverse(); // Most recent first
+        
+        return recentData.map((dataPoint, index) => {
+            const level = parseFloat(dataPoint.level);
+            const monthYear = dataPoint.date;
+            const confidence = dataPoint.confidence || 'medium';
+            
+            // Determine sentiment zone
+            let sentimentZone;
+            if (level < 50) sentimentZone = 'bearish';
+            else if (level < 55) sentimentZone = 'neutral';
+            else if (level < 60) sentimentZone = 'bullish';
+            else sentimentZone = 'extreme-bullish';
+            
+            const displayLabel = index === 0 ? 'LATEST' : `${index}M AGO`;
+            const confidenceIndicator = confidence === 'high' ? '●' : confidence === 'medium' ? '◐' : '○';
+            
+            // Calculate change from previous month if available
+            let changeIndicator = '';
+            if (index < recentData.length - 1) {
+                const previousLevel = parseFloat(recentData[index + 1].level);
+                const change = level - previousLevel;
+                if (Math.abs(change) >= 0.1) {
+                    changeIndicator = change > 0 ? ' ↗' : ' ↘';
+                }
+            }
+            
+            return `
+                <div class="ssi-month-row">
+                    <span class="ssi-month-label">${displayLabel} ${monthYear}</span>
+                    <span class="ssi-month-value ${sentimentZone}">${level.toFixed(1)}%${changeIndicator}</span>
+                    <span class="confidence-indicator" title="Confidence: ${confidence}">${confidenceIndicator}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderSSIHistory(ssiData) {
+        // Show recent 6 months in table format
+        const recentData = ssiData.slice(-6).reverse(); // Most recent first
+        
+        return recentData.map((dataPoint, index) => {
+            const level = parseFloat(dataPoint.level);
+            let sentimentZone;
+            if (level < 50) sentimentZone = 'bearish';
+            else if (level < 55) sentimentZone = 'neutral';
+            else if (level < 60) sentimentZone = 'bullish';
+            else sentimentZone = 'extreme-bullish';
+            
+            const sentimentText = sentimentZone.replace('-', ' ').toUpperCase();
+            const confidenceText = (dataPoint.confidence || 'medium').toUpperCase();
+            
+            return `
+                <tr>
+                    <td>${dataPoint.date}</td>
+                    <td class="${sentimentZone}">${level.toFixed(1)}%</td>
+                    <td class="${sentimentZone}">${sentimentText}</td>
+                    <td>${confidenceText}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
     // Toggle bar expansion for Fear & Greed components
     window.toggleBarExpansion = function(componentId) {
         const barRow = document.getElementById(componentId);
@@ -730,6 +890,154 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Read more functionality
+    function initializeReadMore() {
+        // Target signal descriptions, component descriptions, and main stats
+        const descriptions = document.querySelectorAll('.signal-description, .component-description, .main-stats');
+        console.log('Found descriptions:', descriptions.length);
+        
+        descriptions.forEach((description, index) => {
+            const text = description.textContent.trim();
+            console.log(`Description ${index} length:`, text.length, 'chars');
+            
+            // Check if text is longer than ~200 characters (roughly 3 lines)
+            if (text.length > 200) {
+                console.log('Adding read more to description', index);
+                
+                const words = text.split(' ');
+                // Use 25 words on mobile, 30 on desktop
+                const isMobile = window.innerWidth < 768;
+                const wordLimit = isMobile ? 25 : 30;
+                const truncatedText = words.slice(0, wordLimit).join(' ');
+                const fullText = text;
+                
+                // Create read more link
+                const readMoreLink = document.createElement('span');
+                readMoreLink.innerHTML = ' <span class="read-more-link">read more</span>';
+                readMoreLink.style.cursor = 'pointer';
+                
+                // Create read less link
+                const readLessLink = document.createElement('span');
+                readLessLink.innerHTML = ' <span class="read-more-link">read less</span>';
+                readLessLink.style.cursor = 'pointer';
+                
+                // Set up initial truncated state with inline read more
+                description.innerHTML = truncatedText;
+                description.appendChild(readMoreLink);
+                
+                // Add click handlers
+                readMoreLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Read more clicked');
+                    description.innerHTML = fullText;
+                    description.appendChild(readLessLink);
+                });
+                
+                readLessLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Read less clicked');
+                    description.innerHTML = truncatedText;
+                    description.appendChild(readMoreLink);
+                });
+            }
+        });
+    }
+
     // --- Init ---
     initDashboard();
-}); 
+});
+
+// Subscription Modal Functions (Global scope for HTML onclick)
+function openSubscriptionModal() {
+    const modal = document.getElementById('subscription-modal');
+    const emailInput = document.getElementById('email-input');
+    const form = document.getElementById('subscription-form');
+    const message = document.getElementById('subscription-message');
+    
+    // Reset form
+    form.reset();
+    message.style.display = 'none';
+    
+    // Show modal
+    modal.style.display = 'flex';
+    
+    // Focus on email input
+    setTimeout(() => emailInput.focus(), 100);
+}
+
+function closeSubscriptionModal() {
+    const modal = document.getElementById('subscription-modal');
+    modal.style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('subscription-modal');
+    if (event.target === modal) {
+        closeSubscriptionModal();
+    }
+}
+
+// Handle subscription form submission
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('subscription-form');
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const emailInput = document.getElementById('email-input');
+            const submitButton = document.getElementById('subscribe-submit');
+            const message = document.getElementById('subscription-message');
+            
+            const email = emailInput.value.trim();
+            
+            if (!email) {
+                showSubscriptionMessage('Please enter your email address', 'error');
+                return;
+            }
+            
+            // Disable form during submission
+            submitButton.disabled = true;
+            submitButton.textContent = 'SUBSCRIBING...';
+            
+            try {
+                const response = await fetch('/api/subscribe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSubscriptionMessage(result.message, 'success');
+                    emailInput.value = '';
+                    
+                    // Close modal after 2 seconds
+                    setTimeout(() => {
+                        closeSubscriptionModal();
+                    }, 2000);
+                } else {
+                    showSubscriptionMessage(result.message, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Subscription error:', error);
+                showSubscriptionMessage('An error occurred. Please try again.', 'error');
+            } finally {
+                // Re-enable form
+                submitButton.disabled = false;
+                submitButton.textContent = 'SUBSCRIBE';
+            }
+        });
+    }
+});
+
+function showSubscriptionMessage(text, type) {
+    const message = document.getElementById('subscription-message');
+    message.textContent = text;
+    message.className = `message ${type}`;
+    message.style.display = 'block';
+} 

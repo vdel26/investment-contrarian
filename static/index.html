@@ -12,8 +12,16 @@
         <div class="page-header-container">
             <div class="box-header">
                 <span class="box-title">MARKET SENTIMENT TERMINAL</span>
-                <span id="timestamp" class="timestamp">--</span>
+                <div class="header-controls">
+                    <button class="header-subscribe-btn" onclick="openSubscriptionModal()">Subscribe to Daily Alerts</button>
+                    <span id="timestamp" class="timestamp">--</span>
+                </div>
             </div>
+        </div>
+        
+        <!-- Mobile Sticky Subscribe Button -->
+        <div class="mobile-sticky-subscribe">
+            <button class="mobile-subscribe-btn" onclick="openSubscriptionModal()">Subscribe to Daily Alerts</button>
         </div>
 
         <!-- Contrarian Signal Analysis -->
@@ -150,11 +158,141 @@
 
                 </div>
             </div>
+
+            <!-- Bank of America SSI -->
+            <div class="indicator-container">
+                <div class="box-header">
+                    <span class="box-title">BOFA SSI</span>
+                    <span id="ssi-meta" class="timestamp"></span>
+                </div>
+                <div class="indicator-content">
+                    <div class="main-display">
+                        <div id="ssi-value" class="index-value neutral">--%</div>
+                        <div id="ssi-rating" class="index-label neutral">LOADING</div>
+                        <div class="main-bar-container">
+                        <div class="main-bar">
+                            <div id="ssi-bar-fill" class="main-bar-fill" style="width: 50%; background: #999;"></div>
+                            <div id="ssi-bar-marker" class="main-bar-marker" style="left: 50%;"></div>
+                            <div class="zone-divider" style="left: 10%;"></div>
+                            <div class="zone-divider" style="left: 30%;"></div>
+                            <div class="zone-divider" style="left: 70%;"></div>
+                            <div class="zone-divider" style="left: 90%;"></div>
+                        </div>
+                        <div class="zone-labels">
+                            <span class="zone-label bearish">BEARISH<br>&lt;50%</span>
+                            <span class="zone-label neutral">NEUTRAL<br>50-55%</span>
+                            <span class="zone-label bullish">BULLISH<br>55-60%</span>
+                            <span class="zone-label extreme-bullish">EXTREME<br>&gt;60%</span>
+                        </div>
+                        <div id="ssi-main-stats" class="main-stats">Loading contrarian analysis...</div>
+                    </div>
+                </div>
+
+                <div id="ssi-components" class="ascii-bar">
+                    <!-- SSI Monthly Data Rendered Here -->
+                </div>
+
+                <div class="ascii-divider">─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─</div>
+
+                <div class="collapsible-section">
+                    <div class="section-header" onclick="toggleSection('ssi-history')">
+                        <span class="section-title">▶ HISTORICAL LEVELS</span>
+                        <span id="ssi-summary" class="section-summary"></span>
+                    </div>
+                    <div id="ssi-history-content" class="section-content" style="display: none;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>MONTH</th>
+                                    <th>LEVEL</th>
+                                    <th>SENTIMENT</th>
+                                    <th>CONFIDENCE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ssi-history-table">
+                                <!-- Historical SSI Data Rendered Here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- Pro Subscription Area -->
+            <div class="subscription-container">
+                <div class="box-header">
+                    <span class="box-title">SUBSCRIBE TO DAILY ALERTS</span>
+                    <span class="timestamp">PRO SERVICE</span>
+                </div>
+                <div class="subscription-content">
+                    <div class="subscription-main">
+                        <div class="simple-subscription">
+                            <div class="subscription-offer">
+                                <div class="offer-header">DAILY ALERTS INCLUDE:</div>
+                                <div class="alert-items">
+                                    <div class="alert-row">
+                                        <span class="item-bullet">→</span>
+                                        <span class="item-text">Fear & Greed Index reading</span>
+                                    </div>
+                                    <div class="alert-row">
+                                        <span class="item-bullet">→</span>
+                                        <span class="item-text">AAII Sentiment percentages</span>
+                                    </div>
+                                    <div class="alert-row">
+                                        <span class="item-bullet">→</span>
+                                        <span class="item-text">BofA SSI allocation level</span>
+                                    </div>
+                                    <div class="alert-row">
+                                        <span class="item-bullet">→</span>
+                                        <span class="item-text">Overall recommendation</span>
+                                    </div>
+                                </div>
+                                <div class="delivery-info">
+                                    <span class="delivery-label">SCHEDULE:</span>
+                                    <span class="delivery-value">DAILY @ 06:30 ET</span>
+                                </div>
+                            </div>
+                            
+                            <div class="pricing-terminal">
+                                <div class="pricing-line">
+                                    <span class="price-label">MONTHLY:</span>
+                                    <span class="price-value">$29.00 USD</span>
+                                </div>
+                                <div class="pricing-line">
+                                    <span class="price-label">BILLING:</span>
+                                    <span class="price-value">CANCEL ANYTIME</span>
+                                </div>
+                            </div>
+                            
+                            <button class="subscribe-btn-terminal" onclick="openSubscriptionModal()">SUBSCRIBE TO ALERTS</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div id="loading-indicator" style="display: none;">
         Loading Market Data...
     </div>
+    
+    <!-- Subscription Modal -->
+    <div id="subscription-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Subscribe to Daily Alerts</h2>
+                <span class="close" onclick="closeSubscriptionModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Get daily market sentiment updates delivered to your inbox every morning at 6:30 AM ET.</p>
+                <form id="subscription-form">
+                    <input type="email" id="email-input" placeholder="Enter your email address" required>
+                    <button type="submit" id="subscribe-submit">Subscribe</button>
+                </form>
+                <div id="subscription-message" class="message" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+    
     <script src="js/app.js"></script>
 </body>
 </html> 

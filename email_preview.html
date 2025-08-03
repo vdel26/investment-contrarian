@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Market Sentiment Alert</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', 'SF Mono', monospace;
+            background-color: #0a0a0a;
+            color: #e4e4e4;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #050505;
+            border: 1px solid #333;
+        }
+        
+        /* Header */
+        .email-header {
+            background-color: #111;
+            border-bottom: 1px solid #333;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header-title {
+            color: #ff8c00;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            margin-bottom: 5px;
+        }
+        
+        .header-subtitle {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Main content */
+        .email-content {
+            padding: 20px;
+        }
+        
+        /* Recommendation section */
+        .recommendation-section {
+            background-color: #111;
+            border: 1px solid #333;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .recommendation-label {
+            color: #ff8c00;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+        }
+        
+        .recommendation-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: 0.05em;
+        }
+        
+        .recommendation-value.buy { color: #4ADE80; }
+        .recommendation-value.sell { color: #F87171; }
+        .recommendation-value.hold { color: #FFB347; }
+        
+        .recommendation-commentary {
+            color: #ccc;
+            font-size: 14px;
+            line-height: 1.5;
+            font-style: italic;
+        }
+        
+        /* Indicators grid */
+        .indicators-grid {
+            display: table;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .indicator-row {
+            display: table-row;
+        }
+        
+        .indicator-cell {
+            display: table-cell;
+            width: 50%;
+            padding: 10px;
+            vertical-align: top;
+        }
+        
+        .indicator-box {
+            background-color: #111;
+            border: 1px solid #333;
+            padding: 15px;
+            height: 100%;
+        }
+        
+        .indicator-title {
+            color: #ff8c00;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+        
+        .indicator-value {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .indicator-label {
+            font-size: 12px;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+        
+        .indicator-description {
+            font-size: 11px;
+            color: #888;
+            line-height: 1.4;
+        }
+        
+        /* Color classes for indicators */
+        .fear-extreme { color: #7B68EE; }
+        .fear { color: #4169E1; }
+        .neutral { color: #999; }
+        .greed { color: #FFB347; }
+        .greed-extreme { color: #FF6B6B; }
+        .bearish { color: #4169E1; }
+        .bullish { color: #FFB347; }
+        .extreme-bullish { color: #FF6B6B; }
+        
+        /* SSI section (full width) */
+        .ssi-section {
+            background-color: #111;
+            border: 1px solid #333;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .ssi-content {
+            display: table;
+            width: 100%;
+        }
+        
+        .ssi-main {
+            display: table-cell;
+            width: 60%;
+            padding-right: 15px;
+        }
+        
+        .ssi-data {
+            display: table-cell;
+            width: 40%;
+            vertical-align: top;
+        }
+        
+        .ssi-history {
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .ssi-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 3px;
+        }
+        
+        .ssi-month {
+            display: table-cell;
+            width: 60%;
+            padding-right: 10px;
+        }
+        
+        .ssi-value {
+            display: table-cell;
+            width: 40%;
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        /* Footer */
+        .email-footer {
+            background-color: #111;
+            border-top: 1px solid #333;
+            padding: 15px 20px;
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .footer-info {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links {
+            text-align: center;
+        }
+        
+        .footer-links a {
+            color: #ff8c00;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Mobile responsive */
+        @media only screen and (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .email-container {
+                width: 100% !important;
+            }
+            
+            .indicators-grid {
+                display: block;
+            }
+            
+            .indicator-row {
+                display: block;
+            }
+            
+            .indicator-cell {
+                display: block;
+                width: 100% !important;
+                margin-bottom: 10px;
+            }
+            
+            .ssi-content {
+                display: block;
+            }
+            
+            .ssi-main, .ssi-data {
+                display: block;
+                width: 100% !important;
+                padding-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .recommendation-value {
+                font-size: 28px;
+            }
+            
+            .indicator-value {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="email-header">
+            <div class="header-title">MARKET SENTIMENT TERMINAL</div>
+            <div class="header-subtitle">Daily Alert • July 17, 2025</div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="email-content">
+            <!-- Recommendation Section -->
+            <div class="recommendation-section">
+                <div class="recommendation-label">CONTRARIAN SIGNAL</div>
+                <div class="recommendation-value sell">SELL</div>
+                <div class="recommendation-commentary">Elevated CNN Fear & Greed index signals extreme greed, suggesting potential overbought conditions. AAII sentiment shows bears slightly outnumber bulls, but not significantly. BofA SSI at 54.6% is neutral. Overall, sentiment implies excessive optimism, warranting caution.</div>
+            </div>
+            
+            <!-- Indicators Grid -->
+            <div class="indicators-grid">
+                <div class="indicator-row">
+                    <!-- Fear & Greed -->
+                    <div class="indicator-cell">
+                        <div class="indicator-box">
+                            <div class="indicator-title">CNN Fear & Greed Index</div>
+                            <div class="indicator-value greed-extreme">77.9714285714286</div>
+                            <div class="indicator-label">extreme greed</div>
+                            <div class="indicator-description">Current reading indicates extreme greed sentiment in the market.</div>
+                        </div>
+                    </div>
+                    
+                    <!-- AAII Sentiment -->
+                    <div class="indicator-cell">
+                        <div class="indicator-box">
+                            <div class="indicator-title">AAII Sentiment Survey</div>
+                            <div class="indicator-value neutral">-5.2%</div>
+                            <div class="indicator-label">Bull-Bear Spread</div>
+                            <div class="indicator-description">Bullish: 35.1% | Bearish: 40.3%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SSI Section -->
+            <div class="ssi-section">
+                <div class="indicator-title">Bank of America SSI</div>
+                <div class="ssi-content">
+                    <div class="ssi-main">
+                        <div class="indicator-value neutral">54.6%</div>
+                        <div class="indicator-label">2025-06 • Neutral</div>
+                        <div class="indicator-description">Between 50-55% indicates neutral sentiment.</div>
+                    </div>
+                    <div class="ssi-data">
+                        <div class="ssi-history">RECENT LEVELS:</div>
+                        
+            <div class="ssi-row">
+                <div class="ssi-month">2025-06</div>
+                <div class="ssi-value neutral">54.6%</div>
+            </div>
+        
+            <div class="ssi-row">
+                <div class="ssi-month">2025-05</div>
+                <div class="ssi-value bullish">55.0%</div>
+            </div>
+        
+            <div class="ssi-row">
+                <div class="ssi-month">2025-04</div>
+                <div class="ssi-value neutral">54.5%</div>
+            </div>
+        
+            <div class="ssi-row">
+                <div class="ssi-month">2025-03</div>
+                <div class="ssi-value bullish">56.1%</div>
+            </div>
+        
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Key Metrics Summary -->
+            <div class="indicator-box">
+                <div class="indicator-title">Key Metrics Summary</div>
+                <div style="font-size: 11px; color: #ccc; line-height: 1.5;">
+                    <div style="margin-bottom: 5px;">
+                        <strong>Fear & Greed:</strong> 77.9714285714286/100 (extreme greed)
+                    </div>
+                    <div style="margin-bottom: 5px;">
+                        <strong>AAII Spread:</strong> -5.2% (Sentiment is relatively balanced.)
+                    </div>
+                    <div style="margin-bottom: 5px;">
+                        <strong>SSI Level:</strong> 54.6% (Neutral)
+                    </div>
+                    <div style="margin-top: 10px; font-style: italic;">
+                        <strong>Contrarian Signal:</strong> SELL - Elevated CNN Fear & Greed index signals extreme greed, suggesting potential overbought conditions. AAII sentiment shows bears slightly outnumber bulls, but not significantly. BofA SSI at 54.6% is neutral. Overall, sentiment implies excessive optimism, warranting caution.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="email-footer">
+            <div class="footer-info">
+                <strong>Market Sentiment Terminal</strong> • Daily Alert delivered 2025-07-17 12:04:37 ET<br>
+                This analysis uses contrarian investment principles to identify market sentiment extremes.
+            </div>
+            <div class="footer-links">
+                <a href="https://your-dashboard-url.com">View Dashboard</a> • 
+                <a href="https://your-dashboard-url.com/unsubscribe">Unsubscribe</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

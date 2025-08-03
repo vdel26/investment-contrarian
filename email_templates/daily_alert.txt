@@ -1,0 +1,38 @@
+═══════════════════════════════════════════════════════════
+Daily Market Sentiment Report {{date}}
+═══════════════════════════════════════════════════════════
+
+CONTRARIAN SIGNAL: {{recommendation}}
+{{commentary}}
+
+───────────────────────────────────────────────────────────
+SENTIMENT INDICATORS
+───────────────────────────────────────────────────────────
+
+CNN FEAR & GREED INDEX
+Score: {{fng_score}}/100 ({{fng_rating}}) - {{fng_description}}
+1D AGO: {{fng_1d_ago}} | 1W AGO: {{fng_1w_ago}}
+
+AAII SENTIMENT SURVEY
+Bull-Bear Spread: {{aaii_spread}}% - {{aaii_description}}
+Bullish: {{aaii_bullish}}% | Bearish: {{aaii_bearish}}%
+1W AGO: {{aaii_1w_ago}}% | 1M AGO: {{aaii_1m_ago}}%
+
+BANK OF AMERICA SSI
+Latest: {{ssi_latest_value}}% ({{ssi_latest_month}}) - {{ssi_sentiment}}
+{{ssi_description}}
+
+Recent SSI Levels:
+{{ssi_history_text}}
+
+───────────────────────────────────────────────────────────
+SEE FULL REPORT: {{dashboard_url}}
+───────────────────────────────────────────────────────────
+
+Market Sentiment Terminal • Daily Alert delivered {{timestamp}}
+This analysis uses contrarian investment principles to identify market sentiment extremes.
+
+View Dashboard: {{dashboard_url}}
+Unsubscribe: {{unsubscribe_url}}
+
+═══════════════════════════════════════════════════════════
