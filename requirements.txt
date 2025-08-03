@@ -5,4 +5,5 @@ openpyxl
 xlrd
 openai>=1.14.0
 python-dotenv>=1.0.0
-resend>=0.6.0 
+resend>=0.6.0
+trafilatura>=1.6.0 
