@@ -151,19 +151,38 @@ def generate_template_variables() -> Dict[str, Any]:
     # Process Fear & Greed data
     fng_score = fng_data.get('score', 0)
     fng_rating = fng_data.get('rating', 'Unknown')
-    fng_description = f"Current reading indicates {fng_rating.lower()} sentiment in the market."
+    
+    # Shorter description for email
+    if fng_score < 25:
+        fng_description = "Extreme fear - potential buying opportunity."
+    elif fng_score < 45:
+        fng_description = "Fear dominates - contrarian signal."
+    elif fng_score < 55:
+        fng_description = "Balanced sentiment."
+    elif fng_score < 75:
+        fng_description = "Greed building - caution advised."
+    else:
+        fng_description = "Extreme greed - potential selling opportunity."
+    
+    fng_1d_ago = fng_data.get('previous_close', 0)
+    fng_1w_ago = fng_data.get('previous_1_week', 0)
     
     # Process AAII data
     aaii_bullish = aaii_data.get('bullish', 0)
     aaii_bearish = aaii_data.get('bearish', 0)
     aaii_spread = aaii_bullish - aaii_bearish
     
+    # Get AAII historical data
+    aaii_historical = aaii_data.get('historical', {})
+    aaii_1w_ago = aaii_historical.get('1w_ago', {}).get('spread', 0)
+    aaii_1m_ago = aaii_historical.get('1m_ago', {}).get('spread', 0)
+    
     if aaii_spread > 15:
-        aaii_description = "Excessive bullishness suggests potential market top."
+        aaii_description = "Excessive bullishness - sell signal."
     elif aaii_spread < -15:
-        aaii_description = "Excessive bearishness suggests potential market bottom."
+        aaii_description = "Excessive bearishness - buy signal."
     else:
-        aaii_description = "Sentiment is relatively balanced."
+        aaii_description = "Balanced sentiment."
     
     # Process SSI data
     ssi_latest_value = 0
@@ -180,16 +199,16 @@ def generate_template_variables() -> Dict[str, Any]:
         
         if ssi_latest_value < 50:
             ssi_sentiment = "Bearish"
-            ssi_description = "Below 50% suggests bearish sentiment among sell-side analysts."
+            ssi_description = "Sell-side analysts pessimistic - contrarian buy."
         elif ssi_latest_value < 55:
             ssi_sentiment = "Neutral"
-            ssi_description = "Between 50-55% indicates neutral sentiment."
+            ssi_description = "Balanced analyst sentiment."
         elif ssi_latest_value < 60:
             ssi_sentiment = "Bullish"
-            ssi_description = "Above 55% suggests bullish sentiment among analysts."
+            ssi_description = "Analysts optimistic - caution advised."
         else:
             ssi_sentiment = "Extreme Bullish"
-            ssi_description = "Above 60% indicates extreme bullishness - potential contrarian signal."
+            ssi_description = "Extreme optimism - contrarian sell signal."
         
         ssi_history_html, ssi_history_text = format_ssi_history(ssi_data)
     
@@ -199,7 +218,7 @@ def generate_template_variables() -> Dict[str, Any]:
     
     # Generate timestamp
     now = datetime.now()
-    date_str = now.strftime("%B %d, %Y")
+    date_str = now.strftime("%m.%d.%y")  # Format: 8.3.25
     timestamp = now.strftime("%Y-%m-%d %H:%M:%S ET")
     
     # Build template variables
@@ -214,10 +233,12 @@ def generate_template_variables() -> Dict[str, Any]:
         'commentary': commentary,
         
         # Fear & Greed
-        'fng_score': fng_score,
+        'fng_score': round(fng_score),
         'fng_rating': fng_rating,
         'fng_class': get_fng_class(fng_score),
         'fng_description': fng_description,
+        'fng_1d_ago': round(fng_1d_ago),
+        'fng_1w_ago': round(fng_1w_ago),
         
         # AAII
         'aaii_bullish': f"{aaii_bullish:.1f}",
@@ -225,6 +246,8 @@ def generate_template_variables() -> Dict[str, Any]:
         'aaii_spread': f"{aaii_spread:+.1f}",
         'aaii_class': get_aaii_class(aaii_spread),
         'aaii_description': aaii_description,
+        'aaii_1w_ago': f"{aaii_1w_ago:+.1f}",
+        'aaii_1m_ago': f"{aaii_1m_ago:+.1f}",
         
         # SSI
         'ssi_latest_value': f"{ssi_latest_value:.1f}",
@@ -285,7 +308,7 @@ def generate_email_content() -> Dict[str, str]:
         return {
             'html': html_content,
             'text': text_content,
-            'subject': f"Daily Market Sentiment Alert - {variables['recommendation']} Signal",
+            'subject': f"Daily Market Sentiment Report {variables['date']} - {variables['recommendation']} Signal",
             'variables': variables
         }
         

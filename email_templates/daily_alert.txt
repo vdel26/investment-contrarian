@@ -1,6 +1,5 @@
 ═══════════════════════════════════════════════════════════
-MARKET SENTIMENT TERMINAL
-Daily Alert • {{date}}
+Daily Market Sentiment Report {{date}}
 ═══════════════════════════════════════════════════════════
 
 CONTRARIAN SIGNAL: {{recommendation}}
@@ -11,32 +10,23 @@ SENTIMENT INDICATORS
 ───────────────────────────────────────────────────────────
 
 CNN FEAR & GREED INDEX
-Score: {{fng_score}}/100 ({{fng_rating}})
-{{fng_description}}
+Score: {{fng_score}}/100 ({{fng_rating}}) - {{fng_description}}
+1D AGO: {{fng_1d_ago}} | 1W AGO: {{fng_1w_ago}}
 
 AAII SENTIMENT SURVEY
-Bull-Bear Spread: {{aaii_spread}}%
+Bull-Bear Spread: {{aaii_spread}}% - {{aaii_description}}
 Bullish: {{aaii_bullish}}% | Bearish: {{aaii_bearish}}%
-{{aaii_description}}
+1W AGO: {{aaii_1w_ago}}% | 1M AGO: {{aaii_1m_ago}}%
 
 BANK OF AMERICA SSI
-Latest: {{ssi_latest_value}}% ({{ssi_latest_month}})
-Sentiment: {{ssi_sentiment}}
+Latest: {{ssi_latest_value}}% ({{ssi_latest_month}}) - {{ssi_sentiment}}
 {{ssi_description}}
 
 Recent SSI Levels:
 {{ssi_history_text}}
 
 ───────────────────────────────────────────────────────────
-KEY METRICS SUMMARY
-───────────────────────────────────────────────────────────
-
-Fear & Greed: {{fng_score}}/100 ({{fng_rating}})
-AAII Spread: {{aaii_spread}}% ({{aaii_description}})
-SSI Level: {{ssi_latest_value}}% ({{ssi_sentiment}})
-
-Contrarian Signal: {{recommendation}} - {{commentary}}
-
+SEE FULL REPORT: {{dashboard_url}}
 ───────────────────────────────────────────────────────────
 
 Market Sentiment Terminal • Daily Alert delivered {{timestamp}}

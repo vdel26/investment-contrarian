@@ -13,7 +13,7 @@
         }
         
         body {
-            font-family: 'Courier New', 'SF Mono', monospace;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
             background-color: #0a0a0a;
             color: #e4e4e4;
             line-height: 1.6;
@@ -42,6 +42,8 @@
             font-weight: 600;
             letter-spacing: 0.1em;
             margin-bottom: 5px;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+            text-transform: uppercase;
         }
         
         .header-subtitle {
@@ -62,7 +64,7 @@
             border: 1px solid #333;
             padding: 20px;
             margin-bottom: 20px;
-            text-align: center;
+            text-align: left;
         }
         
         .recommendation-label {
@@ -71,6 +73,7 @@
             font-weight: 600;
             letter-spacing: 0.1em;
             margin-bottom: 10px;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
         }
         
         .recommendation-value {
@@ -78,6 +81,7 @@
             font-weight: 700;
             margin-bottom: 15px;
             letter-spacing: 0.05em;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
         }
         
         .recommendation-value.buy { color: #4ADE80; }
@@ -88,7 +92,8 @@
             color: #ccc;
             font-size: 14px;
             line-height: 1.5;
-            font-style: italic;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+            text-align: left;
         }
         
         /* Indicators grid */
@@ -96,6 +101,7 @@
             display: table;
             width: 100%;
             margin-bottom: 20px;
+            table-layout: fixed;
         }
         
         .indicator-row {
@@ -105,7 +111,7 @@
         .indicator-cell {
             display: table-cell;
             width: 50%;
-            padding: 10px;
+            padding: 10px 0;
             vertical-align: top;
         }
         
@@ -123,24 +129,35 @@
             letter-spacing: 0.1em;
             margin-bottom: 12px;
             text-transform: uppercase;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
         }
         
         .indicator-value {
             font-size: 24px;
             font-weight: 600;
             margin-bottom: 8px;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
         }
         
         .indicator-label {
             font-size: 12px;
             color: #ccc;
             margin-bottom: 10px;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
         }
         
         .indicator-description {
             font-size: 11px;
             color: #888;
             line-height: 1.4;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+        }
+        
+        .indicator-historical {
+            font-size: 10px;
+            color: #666;
+            margin-top: 8px;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
         }
         
         /* Color classes for indicators */
@@ -181,6 +198,7 @@
         .ssi-history {
             font-size: 10px;
             color: #666;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
         }
         
         .ssi-row {
@@ -209,6 +227,7 @@
             padding: 15px 20px;
             font-size: 10px;
             color: #666;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
         }
         
         .footer-info {
@@ -253,6 +272,10 @@
                 margin-bottom: 10px;
             }
             
+            .indicator-box {
+                width: 100% !important;
+            }
+            
             .ssi-content {
                 display: block;
             }
@@ -271,6 +294,30 @@
             .indicator-value {
                 font-size: 20px;
             }
+            
+            /* Mobile: Show value and label inline with right alignment */
+            .mobile-inline {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                margin-bottom: 8px;
+            }
+            
+            .mobile-inline .indicator-value {
+                margin-bottom: 0;
+            }
+            
+            .mobile-inline .indicator-label {
+                margin-bottom: 0;
+                font-size: 14px;
+                text-align: right;
+                text-transform: uppercase;
+            }
+            
+            .ssi-section {
+                width: 100% !important;
+                box-sizing: border-box;
+            }
         }
     </style>
 </head>
@@ -278,8 +325,7 @@
     <div class="email-container">
         <!-- Header -->
         <div class="email-header">
-            <div class="header-title">MARKET SENTIMENT TERMINAL</div>
-            <div class="header-subtitle">Daily Alert • {{date}}</div>
+            <div class="header-title">Daily Market Sentiment Report {{date}}</div>
         </div>
         
         <!-- Main Content -->
@@ -298,9 +344,12 @@
                     <div class="indicator-cell">
                         <div class="indicator-box">
                             <div class="indicator-title">CNN Fear & Greed Index</div>
-                            <div class="indicator-value {{fng_class}}">{{fng_score}}</div>
-                            <div class="indicator-label">{{fng_rating}}</div>
+                            <div class="mobile-inline">
+                                <div class="indicator-value {{fng_class}}">{{fng_score}}</div>
+                                <div class="indicator-label">{{fng_rating}}</div>
+                            </div>
                             <div class="indicator-description">{{fng_description}}</div>
+                            <div class="indicator-historical">1D AGO: {{fng_1d_ago}} | 1W AGO: {{fng_1w_ago}}</div>
                         </div>
                     </div>
                     
@@ -308,9 +357,12 @@
                     <div class="indicator-cell">
                         <div class="indicator-box">
                             <div class="indicator-title">AAII Sentiment Survey</div>
-                            <div class="indicator-value {{aaii_class}}">{{aaii_spread}}%</div>
-                            <div class="indicator-label">Bull-Bear Spread</div>
+                            <div class="mobile-inline">
+                                <div class="indicator-value {{aaii_class}}">{{aaii_spread}}%</div>
+                                <div class="indicator-label">Bull-Bear Spread</div>
+                            </div>
                             <div class="indicator-description">Bullish: {{aaii_bullish}}% | Bearish: {{aaii_bearish}}%</div>
+                            <div class="indicator-historical">1W AGO: {{aaii_1w_ago}}% | 1M AGO: {{aaii_1m_ago}}%</div>
                         </div>
                     </div>
                 </div>
@@ -321,8 +373,11 @@
                 <div class="indicator-title">Bank of America SSI</div>
                 <div class="ssi-content">
                     <div class="ssi-main">
-                        <div class="indicator-value {{ssi_class}}">{{ssi_latest_value}}%</div>
-                        <div class="indicator-label">{{ssi_latest_month}} • {{ssi_sentiment}}</div>
+                        <div class="mobile-inline">
+                            <div class="indicator-value {{ssi_class}}">{{ssi_latest_value}}%</div>
+                            <div class="indicator-label">{{ssi_sentiment}}</div>
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-bottom: 10px; font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;">{{ssi_latest_month}}</div>
                         <div class="indicator-description">{{ssi_description}}</div>
                     </div>
                     <div class="ssi-data">
@@ -332,23 +387,9 @@
                 </div>
             </div>
             
-            <!-- Key Metrics Summary -->
-            <div class="indicator-box">
-                <div class="indicator-title">Key Metrics Summary</div>
-                <div style="font-size: 11px; color: #ccc; line-height: 1.5;">
-                    <div style="margin-bottom: 5px;">
-                        <strong>Fear & Greed:</strong> {{fng_score}}/100 ({{fng_rating}})
-                    </div>
-                    <div style="margin-bottom: 5px;">
-                        <strong>AAII Spread:</strong> {{aaii_spread}}% ({{aaii_description}})
-                    </div>
-                    <div style="margin-bottom: 5px;">
-                        <strong>SSI Level:</strong> {{ssi_latest_value}}% ({{ssi_sentiment}})
-                    </div>
-                    <div style="margin-top: 10px; font-style: italic;">
-                        <strong>Contrarian Signal:</strong> {{recommendation}} - {{commentary}}
-                    </div>
-                </div>
+            <!-- Terminal Link -->
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="{{dashboard_url}}" style="display: block; background-color: #ff8c00; color: #000; padding: 8px 24px; text-decoration: none; font-weight: 600; letter-spacing: 0.05em; border-radius: 3px;">SEE FULL REPORT</a>
             </div>
         </div>
         

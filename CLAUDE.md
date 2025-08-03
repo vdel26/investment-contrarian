@@ -31,6 +31,24 @@ python update_cache.py  # Manual cache refresh
 ls cache/              # View cached data files
 ```
 
+### Email Testing Commands
+```bash
+# Generate email preview files (saves to email_preview.html and email_preview.txt)
+python email_content_generator.py preview
+
+# Send actual test email using current cached market data
+python email_content_generator.py test your@email.com
+
+# Send basic test email (verifies Resend configuration)
+python email_service.py test your@email.com
+
+# View current subscribers (CLI tool)
+python subscribers.py list
+
+# Add subscriber manually (CLI tool)
+python subscribers.py add test@example.com
+```
+
 ## Architecture Overview
 
 ### Two-Layer Caching System
