@@ -9,28 +9,26 @@ from datetime import datetime
 from typing import Dict, Any, Optional, Tuple
 from data_provider import get_fear_and_greed_data, get_aaii_sentiment_data, get_ssi_data, get_overall_analysis_data
 
-# Template paths
-TEMPLATE_DIR = "email_templates"
-HTML_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "daily_alert.html")
-TEXT_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "daily_alert.txt")
-
 # Configuration
-DASHBOARD_URL = "https://your-dashboard-url.com"  # Update with actual URL
-UNSUBSCRIBE_URL = "https://your-dashboard-url.com/unsubscribe"  # Update with actual URL
+from config import EMAIL_TEMPLATES_DIR, DASHBOARD_URL, UNSUBSCRIBE_URL
+
+# Template paths
+HTML_TEMPLATE_PATH = EMAIL_TEMPLATES_DIR / "daily_alert.html"
+TEXT_TEMPLATE_PATH = EMAIL_TEMPLATES_DIR / "daily_alert.txt"
 
 
-def load_template(template_path: str) -> str:
+def load_template(template_path) -> str:
     """
     Load email template from file.
     
     Args:
-        template_path: Path to template file
+        template_path: Path to template file (str or Path object)
         
     Returns:
         Template content as string
     """
     try:
-        with open(template_path, 'r', encoding='utf-8') as f:
+        with open(str(template_path), 'r', encoding='utf-8') as f:
             return f.read()
     except FileNotFoundError:
         raise FileNotFoundError(f"Template file not found: {template_path}")

@@ -1,0 +1,58 @@
+services:
+  # Flask Web Service
+  - type: web
+    name: investment-contrarian-web
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    plan: starter
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SERPAPI_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: FROM_EMAIL
+        sync: false
+      - key: FROM_NAME
+        value: Market Sentiment Terminal
+      - key: OPENAI_MODEL
+        value: gpt-4o
+    disk:
+      name: investment-contrarian-data
+      mountPath: /opt/render/project/src
+      sizeGB: 1
+
+  # Cron Job for Data Updates
+  - type: cron
+    name: investment-contrarian-cron
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python update_cache.py
+    schedule: "0 9 * * *"  # Daily at 9 AM UTC
+    plan: starter
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SERPAPI_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: FROM_EMAIL
+        sync: false
+      - key: FROM_NAME
+        value: Market Sentiment Terminal
+      - key: OPENAI_MODEL
+        value: gpt-4o
+    disk:
+      name: investment-contrarian-data
+      mountPath: /opt/render/project/src
+      sizeGB: 1
+
+# Persistent disk for cache files and subscriber data
+disks:
+  - name: investment-contrarian-data
+    sizeGB: 1

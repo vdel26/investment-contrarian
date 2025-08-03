@@ -15,9 +15,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Configuration
-SUBSCRIBERS_FILE = "subscribers.json"
-SUBSCRIBERS_DIR = "data"
-SUBSCRIBERS_PATH = os.path.join(SUBSCRIBERS_DIR, SUBSCRIBERS_FILE)
+from config import SUBSCRIBERS_FILE
+SUBSCRIBERS_PATH = str(SUBSCRIBERS_FILE)
 
 # Email validation regex
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')

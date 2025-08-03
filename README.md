@@ -37,10 +37,35 @@ RESEND_API_KEY     # Required for email notifications
 FROM_EMAIL         # Email sender address
 ```
 
+## Deployment (Render)
+
+### Quick Deploy
+1. Push code to GitHub
+2. Connect repository to Render
+3. Create Web Service using `render.yaml` configuration
+4. Set environment variables in Render dashboard
+5. Deploy!
+
+### Environment Variables (Required)
+```bash
+OPENAI_API_KEY=your_openai_key
+SERPAPI_KEY=your_serpapi_key
+RESEND_API_KEY=your_resend_key
+FROM_EMAIL=your_verified_email@domain.com
+DASHBOARD_URL=https://your-app.onrender.com
+```
+
+### Services Created
+- **Web Service**: Flask dashboard (`app.py`)
+- **Cron Job**: Daily data updates (`update_cache.py` at 9 AM UTC)
+- **Persistent Disk**: Shared storage for cache files and subscriber data
+
 ## Key Files
 
 - `app.py` - Flask web server
 - `update_cache.py` - Data refresh script
+- `render.yaml` - Render deployment configuration
+- `config.py` - Environment configuration
 - `CLAUDE.md` - Detailed documentation
 - `cache/` - Cached market data
 - `email_templates/` - Email templates

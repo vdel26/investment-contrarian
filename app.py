@@ -103,5 +103,65 @@ def subscriber_stats():
         }), 500
 
 
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for monitoring."""
+    import os
+    from datetime import datetime
+    
+    try:
+        # Check if cache files exist
+        cache_files = {
+            'fng_cache': os.path.exists('cache/fng_cache.json'),
+            'aaii_cache': os.path.exists('cache/aaii_cache.json'),
+            'ssi_cache': os.path.exists('cache/ssi_cache.json'),
+            'overall_cache': os.path.exists('cache/overall_cache.json')
+        }
+        
+        # Check subscriber data
+        subscribers_exist = os.path.exists('data/subscribers.json')
+        
+        # Check environment variables
+        required_env_vars = ['OPENAI_API_KEY', 'SERPAPI_KEY', 'RESEND_API_KEY', 'FROM_EMAIL']
+        env_vars_ok = all(os.environ.get(var) for var in required_env_vars)
+        
+        return jsonify({
+            'status': 'healthy',
+            'timestamp': datetime.now().isoformat(),
+            'cache_files': cache_files,
+            'subscribers_file': subscribers_exist,
+            'environment_configured': env_vars_ok,
+            'version': '1.0.0'
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 500
+
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5001) 
+    import os
+    from config import validate_production_config, IS_PRODUCTION
+    
+    try:
+        # Validate production configuration
+        validate_production_config()
+        
+        # Production configuration
+        port = int(os.environ.get('PORT', 5001))
+        debug = not IS_PRODUCTION
+        
+        print(f"Starting Flask app in {'production' if IS_PRODUCTION else 'development'} mode on port {port}")
+        
+        app.run(host='0.0.0.0', port=port, debug=debug)
+        
+    except ValueError as e:
+        print(f"Configuration Error: {e}")
+        print("Please set the required environment variables and try again.")
+        exit(1)
+    except Exception as e:
+        print(f"Failed to start application: {e}")
+        exit(1) 
