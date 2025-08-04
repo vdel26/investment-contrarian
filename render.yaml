@@ -23,7 +23,7 @@ services:
         value: gpt-4o
     disk:
       name: investment-contrarian-data
-      mountPath: /data
+      mountPath: ./data
       sizeGB: 1
 
   # Cron Job for Data Updates
@@ -51,7 +51,7 @@ services:
         value: gpt-4o
     disk:
       name: investment-contrarian-data
-      mountPath: /data
+      mountPath: ./data
       sizeGB: 1
 
 # Persistent disk for cache files and subscriber data

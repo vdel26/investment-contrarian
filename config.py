@@ -10,13 +10,23 @@ FLASK_ENV = os.environ.get('FLASK_ENV', 'development')
 IS_PRODUCTION = FLASK_ENV == 'production'
 
 # Base directory - handle production vs development
-if IS_PRODUCTION and os.path.exists('/data'):
+# Check for Render mounted disk (could be ./data or /data)
+render_data_paths = [Path('./data'), Path('/data')]
+mounted_data_path = None
+
+for data_path in render_data_paths:
+    if data_path.exists() and os.access(data_path, os.W_OK):
+        mounted_data_path = data_path
+        break
+
+if mounted_data_path is not None:
     # Production: use mounted disk
-    BASE_DIR = Path('/data')
+    BASE_DIR = mounted_data_path
     DATA_DIR = BASE_DIR
     CACHE_DIR = BASE_DIR / "cache"
     LOGS_DIR = BASE_DIR / "logs"
     EMAIL_TEMPLATES_DIR = Path.cwd() / "email_templates"  # Templates stay in app directory
+    print(f"Using mounted disk at: {mounted_data_path}")
 else:
     # Development: use current working directory
     BASE_DIR = Path.cwd()
@@ -24,6 +34,7 @@ else:
     DATA_DIR = BASE_DIR / "data"
     LOGS_DIR = BASE_DIR / "logs"
     EMAIL_TEMPLATES_DIR = BASE_DIR / "email_templates"
+    print(f"Using development paths in: {BASE_DIR}")
 
 # Ensure directories exist
 CACHE_DIR.mkdir(exist_ok=True)
