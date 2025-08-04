@@ -25,7 +25,21 @@ def get_market_data():
         print(f"SSI data: {'error' in ssi_data if isinstance(ssi_data, dict) else 'loaded'}")
         print(f"Overall data: {'error' in overall if isinstance(overall, dict) else 'loaded'}")
 
-        # The getter functions will return a dictionary with an 'error' key if they fail
+        # Check if we have any data at all
+        has_fng = isinstance(fng_data, dict) and "error" not in fng_data
+        has_aaii = isinstance(aaii_data, dict) and "error" not in aaii_data
+        has_ssi = isinstance(ssi_data, list) or (isinstance(ssi_data, dict) and "error" not in ssi_data)
+        has_overall = isinstance(overall, dict) and "error" not in overall
+
+        # If no cache files exist, return a helpful message
+        if not (has_fng or has_aaii or has_ssi or has_overall):
+            return jsonify({
+                "error": "Market data is currently being updated. Please try again in a few minutes.",
+                "status": "initializing",
+                "message": "This appears to be the first deployment. Cache files are being generated."
+            }), 503  # Service Unavailable
+        
+        # If some data is missing, log but continue with what we have
         if (isinstance(fng_data, dict) and "error" in fng_data) or (isinstance(aaii_data, dict) and "error" in aaii_data):
             error_details = []
             if isinstance(fng_data, dict) and "error" in fng_data:
@@ -33,8 +47,8 @@ def get_market_data():
             if isinstance(aaii_data, dict) and "error" in aaii_data:
                 error_details.append(f"AAII: {aaii_data['error']}")
             
-            print(f"Market data errors: {'; '.join(error_details)}")
-            return jsonify({"error": "Failed to load market data from cache.", "details": error_details}), 500
+            print(f"Market data errors (proceeding with available data): {'; '.join(error_details)}")
+            # Don't return error - proceed with whatever data we have
 
         combined_data = {
             "fear_and_greed": fng_data,

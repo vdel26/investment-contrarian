@@ -35,6 +35,8 @@ services:
     schedule: "0 9 * * *"  # Daily at 9 AM UTC
     plan: starter
     envVars:
+      - key: FLASK_ENV
+        value: production
       - key: OPENAI_API_KEY
         sync: false
       - key: SERPAPI_KEY
